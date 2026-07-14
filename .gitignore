@@ -1,0 +1,22 @@
+# Environnements virtuels
+venv/
+.venv/
+env/
+
+# Fichiers Python compilés
+__pycache__/
+*.pyc
+*.pyo
+
+# Variables d'environnement locales (NE JAMAIS COMMIT)
+.env
+
+# Fichiers d'IDE
+.vscode/
+.idea/
+
+# Logs locaux
+*.log
+
+# Système
+.DS_Store

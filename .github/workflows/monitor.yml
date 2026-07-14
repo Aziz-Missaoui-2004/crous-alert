@@ -1,0 +1,76 @@
+# Workflow GitHub Actions : surveillance automatique des logements CROUS Grenoble.
+#
+# Fonctionnement :
+#   - S'exécute automatiquement toutes les 10 minutes (planification "cron"),
+#     et peut aussi être déclenché manuellement depuis l'onglet "Actions".
+#   - Installe Python et les dépendances du projet.
+#   - Exécute app.py, qui vérifie le site, envoie un e-mail si un nouveau
+#     logement apparaît, et met à jour data/cache.json.
+#   - Recommit automatiquement data/cache.json dans le dépôt si son contenu
+#     a changé, afin que le cache soit conservé d'une exécution à l'autre
+#     (les runners GitHub Actions sont jetables et ne conservent rien
+#     entre deux exécutions).
+#
+# Prérequis (voir README, section "Configuration des GitHub Secrets") :
+#   - Secret EMAIL_SENDER   : adresse Gmail utilisée pour l'envoi.
+#   - Secret EMAIL_PASSWORD : mot de passe d'application Gmail (PAS le mot de passe du compte).
+#   - Secret EMAIL_RECEIVER : adresse e-mail qui recevra les alertes.
+#
+# Remarque sur la fréquence :
+#   GitHub Actions n'exécute pas toujours un cron à la seconde près (délais
+#   possibles en cas de forte charge sur l'infrastructure GitHub), et
+#   n'autorise pas d'intervalle inférieur à 5 minutes. Un intervalle de
+#   10 minutes est un bon compromis entre réactivité et fiabilité pour un
+#   dépôt gratuit. Voir README pour ajuster cette valeur.
+
+name: Surveillance CROUS Grenoble
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch: {}
+
+# Empêche deux exécutions de tourner en même temps (évite les écritures
+# concurrentes sur le cache).
+concurrency:
+  group: crous-monitor
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Récupération du dépôt
+        uses: actions/checkout@v4
+
+      - name: Installation de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installation des dépendances
+        run: pip install --no-cache-dir -r requirements.txt
+
+      - name: Exécution de la vérification
+        env:
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+        run: python app.py
+
+      - name: Sauvegarde du cache dans le dépôt
+        run: |
+          if ! git diff --quiet -- data/cache.json; then
+            git config user.name "crous-alert-bot"
+            git config user.email "crous-alert-bot@users.noreply.github.com"
+            git add data/cache.json
+            git commit -m "chore: mise a jour du cache des logements [skip ci]"
+            git push
+          else
+            echo "Cache inchangé, rien à committer."
+          fi
