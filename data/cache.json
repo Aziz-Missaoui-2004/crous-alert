@@ -11,14 +11,14 @@
     "equipements": "1 lit simple"
   },
   {
-    "id": "2126",
-    "residence": "TRONCHE",
+    "id": "2713",
+    "residence": "RUO",
     "type_logement": "Individuel",
     "prix": "Prix non précisé",
     "surface": "Surface non précisée",
-    "adresse": "3 chemin des grenouilles 38700 La Tronche",
+    "adresse": "20, avenue Edmond Esmonin 38100 Grenoble",
     "ville": "Grenoble",
-    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/2126",
-    "equipements": "1 lit simple"
+    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/2713",
+    "equipements": "1 lit double"
   }
 ]
