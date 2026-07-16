@@ -160,7 +160,20 @@ def _parse_card(card: Tag) -> Optional[Housing]:
 
     match = _ACCOMMODATION_LINK_RE.search(href)
     accommodation_id = match.group(1) if match else None
-    unique_id = accommodation_id or make_unique_id(lien, residence, adresse)
+
+    # Important : on NE se base PAS uniquement sur l'ID présent dans l'URL.
+    # Cet ID correspond à l'entrée de résultat de recherche pour une
+    # résidence, pas à une chambre précise (le site CROUS n'expose aucun
+    # identifiant par chambre sur la page de recherche). Si une résidence
+    # déjà connue voit une chambre supplémentaire se libérer, l'URL peut
+    # rester identique alors que le contenu affiché change (fourchette de
+    # prix ou de surface élargie, type de logement différent, etc.).
+    # On inclut donc ces champs dans l'empreinte de l'identifiant unique :
+    # tout changement de contenu visible est ainsi traité comme une
+    # nouveauté à signaler, même si l'ID d'URL, lui, ne change pas.
+    unique_id = make_unique_id(
+        accommodation_id or lien, residence, prix, surface, type_logement, adresse
+    )
 
     return Housing(
         id=unique_id,
