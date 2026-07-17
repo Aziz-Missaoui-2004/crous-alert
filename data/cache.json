@@ -1,5 +1,16 @@
 [
   {
+    "id": "2f8dcaf7039290ee",
+    "residence": "RUO",
+    "type_logement": "Individuel",
+    "prix": "Prix non précisé",
+    "surface": "Surface non précisée",
+    "adresse": "20, avenue Edmond Esmonin 38100 Grenoble",
+    "ville": "Grenoble",
+    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/2659",
+    "equipements": "1 lit simple"
+  },
+  {
     "id": "659f0ffe9f5abda6",
     "residence": "GALILEE",
     "type_logement": "Individuel",
