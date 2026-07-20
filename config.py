@@ -70,6 +70,28 @@ class Settings:
     dry_run: bool = _get_bool_env("DRY_RUN", False)
     """Si True : détecte les nouveautés mais n'envoie aucun e-mail (tests)."""
 
+    excluded_residences: tuple[str, ...] = tuple(
+        r.strip()
+        for r in os.getenv("EXCLUDED_RESIDENCES", "GALILEE").split(",")
+        if r.strip()
+    )
+    """
+    Résidences à ignorer complètement (comparaison insensible à la casse,
+    par sous-chaîne). Par défaut : Galilée. Pour surveiller de nouveau
+    toutes les résidences, définir EXCLUDED_RESIDENCES="" (vide). Pour en
+    exclure plusieurs : EXCLUDED_RESIDENCES="GALILEE,AUTRE RESIDENCE".
+    """
+
+    always_renotify: bool = _get_bool_env("ALWAYS_RENOTIFY", True)
+    """
+    Si True (défaut) : un e-mail est envoyé à CHAQUE cycle pour toute
+    résidence actuellement affichée (non exclue), même si elle a déjà été
+    signalée lors d'un cycle précédent. Utile pour ne jamais manquer une
+    disponibilité, au prix de recevoir plusieurs e-mails tant qu'une
+    annonce reste en ligne. Mettre à False pour revenir au comportement
+    "une seule alerte par annonce" (basé sur le cache).
+    """
+
     def validate(self) -> None:
         """
         Vérifie que la configuration est exploitable.
