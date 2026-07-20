@@ -90,8 +90,34 @@ def parse_housings(html: str) -> List[Housing]:
         if housing is not None:
             housings.append(housing)
 
+    housings = _filter_excluded_residences(housings)
+
     logger.info("%d logement(s) extrait(s) du HTML.", len(housings))
     return housings
+
+
+def _filter_excluded_residences(housings: List[Housing]) -> List[Housing]:
+    """
+    Retire les logements appartenant à une résidence exclue de la
+    configuration (ex. Galilée, non accessible pour un niveau d'études
+    donné). Comparaison insensible à la casse, par sous-chaîne, sur le
+    nom de la résidence.
+    """
+    excluded = [r.lower() for r in settings.excluded_residences if r]
+    if not excluded:
+        return housings
+
+    kept: List[Housing] = []
+    for housing in housings:
+        residence_lower = housing.residence.lower()
+        if any(ex in residence_lower for ex in excluded):
+            logger.info(
+                "Résidence '%s' ignorée (exclue via EXCLUDED_RESIDENCES).",
+                housing.residence,
+            )
+            continue
+        kept.append(housing)
+    return kept
 
 
 def _find_housing_cards(soup: BeautifulSoup) -> List[Tag]:
