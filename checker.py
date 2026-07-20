@@ -93,7 +93,16 @@ class CrousChecker:
                      len(housings), self.settings.city_name)
 
         known = self.cache_store.load()
-        new_housings = [h for h in housings if h.id not in known]
+
+        if self.settings.always_renotify:
+            # Mode "re-notification systématique" : on signale toute
+            # résidence actuellement affichée (non exclue), même si elle
+            # a déjà été signalée à un cycle précédent. Le cache continue
+            # d'être mis à jour (utile pour les logs / futures évolutions)
+            # mais n'est plus utilisé pour filtrer les alertes.
+            new_housings = housings
+        else:
+            new_housings = [h for h in housings if h.id not in known]
 
         if new_housings:
             logger.info("Nouveau logement trouvé : %d nouveauté(s).", len(new_housings))
