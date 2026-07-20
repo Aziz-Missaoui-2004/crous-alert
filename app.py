@@ -26,7 +26,7 @@ import sys
 from checker import CrousChecker
 from config import settings
 from email_sender import EmailSender
-from exceptions import CrousAlertError
+from exceptions import CrousAlertError, FetchError
 from logger import get_logger
 from storage import CacheStore
 
@@ -56,6 +56,21 @@ def run() -> int:
 
     try:
         result = checker.check()
+    except FetchError as exc:
+        # Le site est temporairement injoignable (maintenance, forte
+        # affluence, erreur réseau passagère...). Ce n'est PAS un bug de
+        # notre programme : les tentatives avec backoff ont déjà été
+        # épuisées. On journalise l'incident mais on retourne 0 (succès)
+        # plutôt que 1, afin que le job GitHub Actions ne soit pas marqué
+        # en échec — sinon GitHub envoie automatiquement un e-mail de
+        # notification d'échec à chaque cycle où le site est indisponible.
+        # Le prochain cycle (10 minutes plus tard) retentera naturellement.
+        logger.warning(
+            "Site CROUS indisponible pour le moment (maintenance ou forte "
+            "affluence probable). Nouvelle tentative au prochain cycle : %s",
+            exc,
+        )
+        return 0
     except CrousAlertError as exc:
         logger.error("Échec de la vérification : %s", exc)
         return 1
