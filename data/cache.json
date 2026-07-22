@@ -1,16 +1,5 @@
 [
   {
-    "id": "0202cdc4239eed82",
-    "residence": "GENEVIEVE JOURDAIN",
-    "type_logement": "Colocation",
-    "prix": "Prix non précisé",
-    "surface": "Surface non précisée",
-    "adresse": "6 rue de Vassieux en Vercors 38000 GRENOBLE",
-    "ville": "Grenoble",
-    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/2161",
-    "equipements": "3 lits simples"
-  },
-  {
     "id": "4c20088b72e3a283",
     "residence": "MDE",
     "type_logement": "Colocation",
@@ -31,5 +20,16 @@
     "ville": "Grenoble",
     "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/2657",
     "equipements": "1 lit double"
+  },
+  {
+    "id": "0202cdc4239eed82",
+    "residence": "GENEVIEVE JOURDAIN",
+    "type_logement": "Colocation",
+    "prix": "Prix non précisé",
+    "surface": "Surface non précisée",
+    "adresse": "6 rue de Vassieux en Vercors 38000 GRENOBLE",
+    "ville": "Grenoble",
+    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/2161",
+    "equipements": "3 lits simples"
   }
 ]
