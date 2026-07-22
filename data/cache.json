@@ -1,27 +1,5 @@
 [
   {
-    "id": "dff7dfe84911d8be",
-    "residence": "HALLE BRUN",
-    "type_logement": "Individuel",
-    "prix": "Prix non précisé",
-    "surface": "Surface non précisée",
-    "adresse": "7, 13, 19 place du 24 avril 1915 - Avenue Ambroise Croisat 38406 Saint-Martin d HÃ¨res",
-    "ville": "Grenoble",
-    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/2657",
-    "equipements": "1 lit double"
-  },
-  {
-    "id": "0202cdc4239eed82",
-    "residence": "GENEVIEVE JOURDAIN",
-    "type_logement": "Colocation",
-    "prix": "Prix non précisé",
-    "surface": "Surface non précisée",
-    "adresse": "6 rue de Vassieux en Vercors 38000 GRENOBLE",
-    "ville": "Grenoble",
-    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/2161",
-    "equipements": "3 lits simples"
-  },
-  {
     "id": "4c20088b72e3a283",
     "residence": "MDE",
     "type_logement": "Colocation",
@@ -42,5 +20,27 @@
     "ville": "Grenoble",
     "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/573",
     "equipements": "2 lits simples"
+  },
+  {
+    "id": "0202cdc4239eed82",
+    "residence": "GENEVIEVE JOURDAIN",
+    "type_logement": "Colocation",
+    "prix": "Prix non précisé",
+    "surface": "Surface non précisée",
+    "adresse": "6 rue de Vassieux en Vercors 38000 GRENOBLE",
+    "ville": "Grenoble",
+    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/2161",
+    "equipements": "3 lits simples"
+  },
+  {
+    "id": "dff7dfe84911d8be",
+    "residence": "HALLE BRUN",
+    "type_logement": "Individuel",
+    "prix": "Prix non précisé",
+    "surface": "Surface non précisée",
+    "adresse": "7, 13, 19 place du 24 avril 1915 - Avenue Ambroise Croisat 38406 Saint-Martin d HÃ¨res",
+    "ville": "Grenoble",
+    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/2657",
+    "equipements": "1 lit double"
   }
 ]
