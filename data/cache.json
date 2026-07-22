@@ -11,17 +11,6 @@
     "equipements": "4 lits simples"
   },
   {
-    "id": "50a4702c808640fa",
-    "residence": "FILAOS",
-    "type_logement": "Colocation",
-    "prix": "Prix non précisé",
-    "surface": "Surface non précisée",
-    "adresse": "1 rue colonel dumont - ILOT M 38000 GRENOBLE",
-    "ville": "Grenoble",
-    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/573",
-    "equipements": "2 lits simples"
-  },
-  {
     "id": "0202cdc4239eed82",
     "residence": "GENEVIEVE JOURDAIN",
     "type_logement": "Colocation",
@@ -42,5 +31,16 @@
     "ville": "Grenoble",
     "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/2657",
     "equipements": "1 lit double"
+  },
+  {
+    "id": "50a4702c808640fa",
+    "residence": "FILAOS",
+    "type_logement": "Colocation",
+    "prix": "Prix non précisé",
+    "surface": "Surface non précisée",
+    "adresse": "1 rue colonel dumont - ILOT M 38000 GRENOBLE",
+    "ville": "Grenoble",
+    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/573",
+    "equipements": "2 lits simples"
   }
 ]
