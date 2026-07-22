@@ -22,17 +22,6 @@
     "equipements": "3 lits simples"
   },
   {
-    "id": "4c20088b72e3a283",
-    "residence": "MDE",
-    "type_logement": "Colocation",
-    "prix": "Prix non précisé",
-    "surface": "Surface non précisée",
-    "adresse": "6 PLACE PASTEUR 38000 GRENOBLE",
-    "ville": "Grenoble",
-    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/1704",
-    "equipements": "4 lits simples"
-  },
-  {
     "id": "50a4702c808640fa",
     "residence": "FILAOS",
     "type_logement": "Colocation",
@@ -42,5 +31,16 @@
     "ville": "Grenoble",
     "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/573",
     "equipements": "2 lits simples"
+  },
+  {
+    "id": "4c20088b72e3a283",
+    "residence": "MDE",
+    "type_logement": "Colocation",
+    "prix": "Prix non précisé",
+    "surface": "Surface non précisée",
+    "adresse": "6 PLACE PASTEUR 38000 GRENOBLE",
+    "ville": "Grenoble",
+    "lien": "https://trouverunlogement.lescrous.fr/tools/47/accommodations/1704",
+    "equipements": "4 lits simples"
   }
 ]
