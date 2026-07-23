@@ -7,6 +7,12 @@ Construction et envoi de l'e-mail d'alerte via SMTP Gmail.
 Les identifiants (adresse, mot de passe d'application, destinataire) sont
 lus exclusivement depuis les variables d'environnement (voir config.py),
 jamais codés en dur ici.
+
+Chaque logement affiché dans l'e-mail est accompagné de liens "Ignorer"
+(résidence / type de logement) qui ouvrent une issue GitHub pré-remplie.
+Le workflow .github/workflows/handle-exclusion.yml traite ensuite cette
+issue automatiquement pour mettre à jour data/exclusions.json (voir
+storage.load_exclusions et parser._apply_exclusions).
 """
 
 from __future__ import annotations
@@ -15,6 +21,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import List
+from urllib.parse import quote
 
 from config import Settings
 from exceptions import EmailSendError
@@ -25,6 +32,12 @@ from utils import now_french_datetime, retry_with_backoff
 logger = get_logger(__name__)
 
 _SUBJECT = "🚨 Nouveau logement CROUS disponible à Grenoble"
+
+_ISSUE_BODY_TEMPLATE = (
+    "Cette issue a ete creee automatiquement en cliquant sur un lien "
+    "\"Ignorer\" dans un e-mail d'alerte CROUS. Elle sera traitee et "
+    "fermee automatiquement par le workflow handle-exclusion.yml."
+)
 
 
 class EmailSender:
@@ -49,8 +62,8 @@ class EmailSender:
             return
 
         date_str, time_str = now_french_datetime()
-        html_body = _build_html_body(new_housings, total_count, date_str, time_str)
-        text_body = _build_text_body(new_housings, total_count, date_str, time_str)
+        html_body = _build_html_body(new_housings, total_count, date_str, time_str, self.settings)
+        text_body = _build_text_body(new_housings, total_count, date_str, time_str, self.settings)
 
         message = MIMEMultipart("alternative")
         message["Subject"] = _SUBJECT
@@ -86,7 +99,23 @@ class EmailSender:
             ) from exc
 
 
-def _build_text_body(housings: List[Housing], total_count: int, date_str: str, time_str: str) -> str:
+def _residence_exclude_url(settings: Settings, residence: str) -> str:
+    """URL pré-remplie pour créer une issue GitHub 'exclure cette résidence'."""
+    title = quote(f"exclure-residence:{residence}")
+    body = quote(_ISSUE_BODY_TEMPLATE)
+    return f"{settings.github_repo_url}/issues/new?title={title}&body={body}&labels=exclusion-auto"
+
+
+def _type_exclude_url(settings: Settings, type_logement: str) -> str:
+    """URL pré-remplie pour créer une issue GitHub 'exclure ce type de logement'."""
+    title = quote(f"exclure-type:{type_logement}")
+    body = quote(_ISSUE_BODY_TEMPLATE)
+    return f"{settings.github_repo_url}/issues/new?title={title}&body={body}&labels=exclusion-auto"
+
+
+def _build_text_body(
+    housings: List[Housing], total_count: int, date_str: str, time_str: str, settings: Settings
+) -> str:
     lines = [
         "Nouveau(x) logement(s) CROUS disponible(s) à Grenoble !",
         f"Détecté le {date_str} à {time_str}",
@@ -103,14 +132,21 @@ def _build_text_body(housings: List[Housing], total_count: int, date_str: str, t
                 f"  Surface   : {h.surface}",
                 f"  Adresse   : {h.adresse}",
                 f"  Lien      : {h.lien}",
-                "",
+                f"  Ignorer cette résidence : {_residence_exclude_url(settings, h.residence)}",
             ]
         )
+        if h.type_logement in ("Individuel", "Couple", "Colocation"):
+            lines.append(
+                f"  Ignorer le type '{h.type_logement}' : {_type_exclude_url(settings, h.type_logement)}"
+            )
+        lines.append("")
     return "\n".join(lines)
 
 
-def _build_html_body(housings: List[Housing], total_count: int, date_str: str, time_str: str) -> str:
-    cards_html = "".join(_housing_card_html(h) for h in housings)
+def _build_html_body(
+    housings: List[Housing], total_count: int, date_str: str, time_str: str, settings: Settings
+) -> str:
+    cards_html = "".join(_housing_card_html(h, settings) for h in housings)
 
     return f"""\
 <!DOCTYPE html>
@@ -139,6 +175,7 @@ def _build_html_body(housings: List[Housing], total_count: int, date_str: str, t
               {cards_html}
               <p style="font-size:12px; color:#888888; margin-top:24px;">
                 Cette alerte a été générée automatiquement par votre système de surveillance CROUS Grenoble.
+                Cliquer sur "Ignorer" crée une demande d'exclusion traitée automatiquement sous peu.
               </p>
             </td>
           </tr>
@@ -151,12 +188,27 @@ def _build_html_body(housings: List[Housing], total_count: int, date_str: str, t
 """
 
 
-def _housing_card_html(h: Housing) -> str:
+def _housing_card_html(h: Housing, settings: Settings) -> str:
     equip_html = (
         f'<p style="font-size:13px; color:#555555; margin:4px 0 0;">🧰 {h.equipements}</p>'
         if h.equipements
         else ""
     )
+
+    residence_url = _residence_exclude_url(settings, h.residence)
+    ignore_buttons = (
+        f'<a href="{residence_url}" style="display:inline-block; background-color:#ce0500; '
+        f'color:#ffffff; text-decoration:none; padding:8px 14px; border-radius:6px; '
+        f'font-size:12px; margin-right:8px;">🚫 Ignorer cette résidence</a>'
+    )
+    if h.type_logement in ("Individuel", "Couple", "Colocation"):
+        type_url = _type_exclude_url(settings, h.type_logement)
+        ignore_buttons += (
+            f'<a href="{type_url}" style="display:inline-block; background-color:#6a6a6a; '
+            f'color:#ffffff; text-decoration:none; padding:8px 14px; border-radius:6px; '
+            f'font-size:12px;">🚫 Ignorer les "{h.type_logement}"</a>'
+        )
+
     return f"""\
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
        style="border:1px solid #e0e0e0; border-radius:8px; margin-bottom:16px;">
@@ -170,6 +222,9 @@ def _housing_card_html(h: Housing) -> str:
         <a href="{h.lien}" style="display:inline-block; background-color:#000091; color:#ffffff; text-decoration:none; padding:10px 18px; border-radius:6px; font-size:13px;">
           Voir l'annonce
         </a>
+      </p>
+      <p style="margin:10px 0 0;">
+        {ignore_buttons}
       </p>
     </td>
   </tr>
