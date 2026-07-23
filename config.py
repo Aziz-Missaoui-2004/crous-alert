@@ -76,10 +76,33 @@ class Settings:
         if r.strip()
     )
     """
-    Résidences à ignorer complètement (comparaison insensible à la casse,
-    par sous-chaîne). Par défaut : Galilée. Pour surveiller de nouveau
-    toutes les résidences, définir EXCLUDED_RESIDENCES="" (vide). Pour en
-    exclure plusieurs : EXCLUDED_RESIDENCES="GALILEE,AUTRE RESIDENCE".
+    Résidences à ignorer, définies manuellement via variable
+    d'environnement (comparaison insensible à la casse, par
+    sous-chaîne). S'ADDITIONNE aux exclusions dynamiques stockées dans
+    data/exclusions.json (voir EXCLUSIONS_PATH ci-dessous), qui elles
+    sont mises à jour automatiquement via les liens "Ignorer" des
+    e-mails d'alerte. Pour ne rien exclure via cette variable :
+    EXCLUDED_RESIDENCES="" (vide). Plusieurs valeurs : séparées par
+    des virgules.
+    """
+
+    excluded_types: tuple[str, ...] = tuple(
+        t.strip() for t in os.getenv("EXCLUDED_TYPES", "").split(",") if t.strip()
+    )
+    """
+    Types de logement à ignorer, définis manuellement via variable
+    d'environnement (ex: "Colocation"). S'additionne également aux
+    exclusions dynamiques de data/exclusions.json.
+    """
+
+    exclusions_path: str = os.getenv(
+        "EXCLUSIONS_PATH", os.path.join("data", "exclusions.json")
+    )
+    """
+    Chemin du fichier JSON des exclusions dynamiques, mis à jour
+    automatiquement par le workflow .github/workflows/handle-exclusion.yml
+    lorsqu'une personne clique sur un lien "Ignorer" dans un e-mail
+    d'alerte. Structure : {"residences": [...], "types": [...]}.
     """
 
     always_renotify: bool = _get_bool_env("ALWAYS_RENOTIFY", True)
@@ -90,6 +113,15 @@ class Settings:
     disponibilité, au prix de recevoir plusieurs e-mails tant qu'une
     annonce reste en ligne. Mettre à False pour revenir au comportement
     "une seule alerte par annonce" (basé sur le cache).
+    """
+
+    github_repo_url: str = os.getenv(
+        "GITHUB_REPO_URL", "https://github.com/Aziz-Missaoui-2004/crous-alert"
+    )
+    """
+    URL du dépôt GitHub du projet, utilisée pour construire les liens
+    "Ignorer cette résidence" / "Ignorer ce type de logement" insérés
+    dans les e-mails d'alerte (voir email_sender.py).
     """
 
     def validate(self) -> None:
