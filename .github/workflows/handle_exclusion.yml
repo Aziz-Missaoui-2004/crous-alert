@@ -1,0 +1,72 @@
+# Workflow GitHub Actions : traitement automatique des demandes d'exclusion
+# envoyées par e-mail via un lien "Ignorer cette résidence" / "Ignorer ce
+# type de logement".
+#
+# Fonctionnement :
+#   1. Un e-mail d'alerte contient un lien qui ouvre une nouvelle issue
+#      GitHub pré-remplie (titre du type "exclure-residence:GALILEE" ou
+#      "exclure-type:Colocation").
+#   2. La personne clique sur "Submit new issue" (2 clics au total,
+#      GitHub n'autorise pas la création d'issue sans confirmation).
+#   3. Ce workflow se déclenche automatiquement à l'ouverture de l'issue,
+#      met à jour data/exclusions.json, commit le changement, confirme
+#      par un commentaire, puis ferme l'issue.
+#
+# Aucune configuration supplémentaire nécessaire : utilise le token
+# GITHUB_TOKEN fourni automatiquement par GitHub Actions.
+
+name: Gérer les demandes d'exclusion par e-mail
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  handle:
+    if: >
+      startsWith(github.event.issue.title, 'exclure-residence:') ||
+      startsWith(github.event.issue.title, 'exclure-type:')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Récupération du dépôt
+        uses: actions/checkout@v4
+
+      - name: Installation de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Traitement de la demande d'exclusion
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: python3 scripts/handle_exclusion.py
+
+      - name: Sauvegarde des exclusions dans le dépôt
+        run: |
+          if ! git diff --quiet -- data/exclusions.json; then
+            git config user.name "crous-alert-bot"
+            git config user.email "crous-alert-bot@users.noreply.github.com"
+            git add data/exclusions.json
+            git commit -m "chore: mise a jour des exclusions [skip ci]"
+            git pull --rebase origin main
+            git push
+          else
+            echo "Aucun changement a committer."
+          fi
+
+      - name: Confirmation et fermeture de l'issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MESSAGE=$(cat exclusion_result.txt 2>/dev/null || echo "Demande traitée.")
+          gh issue comment "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}" \
+            --body "✅ $MESSAGE"
+          gh issue close "${{ github.event.issue.number }}" \
+            --repo "${{ github.repository }}"
