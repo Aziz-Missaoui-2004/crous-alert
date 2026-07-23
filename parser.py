@@ -27,12 +27,23 @@ chaque déploiement du site et ne sont donc PAS fiables comme sélecteur
 sur le long terme. Pour rendre le scraper robuste dans le temps, ce
 module repose sur deux niveaux de résilience :
 
-1. Sélection des cartes via un sélecteur CSS partiel et stable
-   (`div[class*="fr-card"]`), combiné à la présence d'un lien vers
+1. Sélection des cartes via le token de classe exact "fr-card" (pas une
+   sous-chaîne, pour éviter les faux positifs sur les sous-éléments BEM
+   comme "fr-card__body"), combiné à la présence d'un lien vers
    `/accommodations/<id>` (ce qui exclut les cartes de filtres).
 2. Extraction des données (prix, surface, adresse, type) via des motifs
    de texte stables (ex. "€", "m²", code postal à 5 chiffres) plutôt que
    via des classes CSS précises, qui sont plus susceptibles de changer.
+
+Exclusions
+----------
+Deux mécanismes complémentaires permettent d'ignorer certaines annonces :
+- EXCLUDED_RESIDENCES / EXCLUDED_TYPES (variables d'environnement,
+  réglage manuel dans config.py) ;
+- data/exclusions.json (fichier dynamique, mis à jour automatiquement
+  via les liens "Ignorer" cliqués dans les e-mails d'alerte, voir
+  storage.load_exclusions et le workflow handle-exclusion.yml).
+Les deux sont fusionnés à chaque cycle.
 """
 
 from __future__ import annotations
@@ -47,7 +58,7 @@ from bs4.element import Tag
 from config import settings
 from exceptions import ParsingError
 from logger import get_logger
-from storage import Housing
+from storage import Housing, load_exclusions
 from utils import make_unique_id
 
 logger = get_logger(__name__)
@@ -61,15 +72,17 @@ _KNOWN_TYPES = ("Individuel", "Couple", "Colocation")
 
 def parse_housings(html: str) -> List[Housing]:
     """
-    Extrait la liste des logements présents dans le HTML fourni.
+    Extrait la liste des logements présents dans le HTML fourni, après
+    application des exclusions (résidences et types de logement à
+    ignorer).
 
     Args:
         html: contenu HTML brut de la page de résultats CROUS.
 
     Returns:
         Liste d'objets Housing (peut être vide si aucun logement
-        n'est actuellement disponible : c'est un cas normal, pas une
-        erreur).
+        n'est actuellement disponible, ou si tous les logements trouvés
+        sont exclus : ce sont des cas normaux, pas des erreurs).
 
     Raises:
         ParsingError: si le HTML ne peut pas être interprété du tout
@@ -90,29 +103,43 @@ def parse_housings(html: str) -> List[Housing]:
         if housing is not None:
             housings.append(housing)
 
-    housings = _filter_excluded_residences(housings)
+    housings = _apply_exclusions(housings)
 
-    logger.info("%d logement(s) extrait(s) du HTML.", len(housings))
+    logger.info("%d logement(s) extrait(s) du HTML (après exclusions).", len(housings))
     return housings
 
 
-def _filter_excluded_residences(housings: List[Housing]) -> List[Housing]:
+def _apply_exclusions(housings: List[Housing]) -> List[Housing]:
     """
-    Retire les logements appartenant à une résidence exclue de la
-    configuration (ex. Galilée, non accessible pour un niveau d'études
-    donné). Comparaison insensible à la casse, par sous-chaîne, sur le
-    nom de la résidence.
+    Filtre la liste des logements en retirant :
+    - les résidences exclues (config.settings.excluded_residences +
+      data/exclusions.json, comparaison insensible à la casse, par
+      sous-chaîne) ;
+    - les types de logement exclus (config.settings.excluded_types +
+      data/exclusions.json, comparaison insensible à la casse, exacte).
     """
-    excluded = [r.lower() for r in settings.excluded_residences if r]
-    if not excluded:
+    dynamic = load_exclusions(settings.exclusions_path)
+
+    excluded_residences = {
+        r.lower() for r in (*settings.excluded_residences, *dynamic.get("residences", [])) if r
+    }
+    excluded_types = {
+        t.lower() for t in (*settings.excluded_types, *dynamic.get("types", [])) if t
+    }
+
+    if not excluded_residences and not excluded_types:
         return housings
 
     kept: List[Housing] = []
     for housing in housings:
         residence_lower = housing.residence.lower()
-        if any(ex in residence_lower for ex in excluded):
+        if excluded_residences and any(ex in residence_lower for ex in excluded_residences):
+            logger.info("Résidence '%s' ignorée (exclusion résidence).", housing.residence)
+            continue
+        if excluded_types and housing.type_logement.lower() in excluded_types:
             logger.info(
-                "Résidence '%s' ignorée (exclue via EXCLUDED_RESIDENCES).",
+                "Logement de type '%s' ignoré (résidence '%s', exclusion type).",
+                housing.type_logement,
                 housing.residence,
             )
             continue
