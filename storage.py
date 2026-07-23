@@ -2,13 +2,11 @@
 storage.py
 ==========
 
-Modèle de données `Housing` (un logement CROUS) et gestion du cache
-persistant au format JSON, utilisé pour ne jamais envoyer deux fois la
-même alerte.
-
-Le cache est un simple fichier JSON contenant la liste des identifiants
-de logements déjà signalés, ainsi que leurs détails (utile pour le debug
-et pour construire le contenu de l'e-mail).
+Modèle de données `Housing` (un logement CROUS), gestion du cache
+persistant au format JSON (utilisé pour ne jamais envoyer deux fois la
+même alerte), et gestion des exclusions dynamiques (résidences / types
+de logement à ignorer, mises à jour via les liens "Ignorer" des e-mails
+d'alerte).
 """
 
 from __future__ import annotations
@@ -109,3 +107,38 @@ class CacheStore:
             raise StorageError(f"Impossible d'écrire le cache '{self.path}' : {exc}") from exc
 
         logger.info("Cache mis à jour : %d logement(s) enregistré(s).", len(housings))
+
+
+def load_exclusions(path: str) -> Dict[str, List[str]]:
+    """
+    Charge le fichier des exclusions dynamiques (résidences et types de
+    logement à ignorer), mis à jour automatiquement par le workflow
+    `handle-exclusion.yml` quand quelqu'un clique sur un lien "Ignorer"
+    dans un e-mail d'alerte.
+
+    Retourne toujours un dictionnaire avec les clés "residences" et
+    "types" (listes vides si le fichier n'existe pas encore ou est
+    invalide) : ce n'est PAS un cas d'erreur bloquant, contrairement au
+    cache principal, car l'absence d'exclusions est un état parfaitement
+    normal (rien n'a encore été exclu).
+    """
+    default: Dict[str, List[str]] = {"residences": [], "types": []}
+
+    if not os.path.exists(path):
+        return default
+
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning(
+            "Impossible de lire le fichier d'exclusions '%s' (%s). "
+            "Aucune exclusion dynamique ne sera appliquée pour ce cycle.",
+            path,
+            exc,
+        )
+        return default
+
+    data.setdefault("residences", [])
+    data.setdefault("types", [])
+    return data
