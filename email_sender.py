@@ -68,7 +68,9 @@ class EmailSender:
         message = MIMEMultipart("alternative")
         message["Subject"] = _SUBJECT
         message["From"] = self.settings.email_sender
-        message["To"] = self.settings.email_receiver
+        # Les destinataires sont passés à SMTP comme destinataires cachés :
+        # chaque personne ne voit donc pas les adresses des autres.
+        message["To"] = "undisclosed-recipients:;"
         message.attach(MIMEText(text_body, "plain", "utf-8"))
         message.attach(MIMEText(html_body, "html", "utf-8"))
 
@@ -81,12 +83,15 @@ class EmailSender:
             exceptions=(smtplib.SMTPException, OSError),
         )
         def _do_send() -> None:
-            logger.info("Envoi de l'e-mail d'alerte à %s...", self.settings.email_receiver)
+            logger.info(
+                "Envoi de l'e-mail d'alerte à %d destinataire(s)...",
+                len(self.settings.email_receivers),
+            )
             with smtplib.SMTP_SSL(self.settings.smtp_host, self.settings.smtp_port, timeout=self.settings.request_timeout) as server:
                 server.login(self.settings.email_sender, self.settings.email_password)
                 server.sendmail(
                     self.settings.email_sender,
-                    [self.settings.email_receiver],
+                    list(self.settings.email_receivers),
                     message.as_string(),
                 )
             logger.info("Mail envoyé.")

@@ -136,7 +136,7 @@ Toutes les options se règlent via variables d'environnement (voir
 |-----------------------|------------------------------------------------------|----------------------------------|
 | `EMAIL_SENDER`         | Adresse Gmail expéditrice                             | *(requis)*                       |
 | `EMAIL_PASSWORD`       | Mot de passe d'application Gmail                      | *(requis)*                       |
-| `EMAIL_RECEIVER`       | Adresse destinataire des alertes                      | *(requis)*                       |
+| `EMAIL_RECEIVERS`      | Une ou plusieurs adresses, séparées par `,` ou `;`    | *(requis)*                       |
 | `TARGET_URL`           | URL de recherche CROUS à surveiller                    | Recherche Grenoble (voir config.py) |
 | `CITY_NAME`            | Nom de ville affiché dans les alertes                 | `Grenoble`                       |
 | `REQUEST_TIMEOUT`      | Timeout HTTP (secondes)                               | `15`                              |
@@ -174,7 +174,7 @@ identifiants dans le code :
    suivants :
    - `EMAIL_SENDER` → votre adresse Gmail
    - `EMAIL_PASSWORD` → le mot de passe d'application généré à l'étape 5
-   - `EMAIL_RECEIVER` → l'adresse qui recevra les alertes
+   - `EMAIL_RECEIVERS` → les adresses qui recevront les alertes, séparées par des virgules
 
 Ces secrets sont automatiquement injectés dans le workflow
 (`.github/workflows/monitor.yml`) et ne sont jamais visibles dans les
@@ -265,7 +265,7 @@ architecture permet d'ajouter facilement d'autres villes :
 - Vérifiez les logs de l'exécution GitHub Actions (onglet Actions →
   dernière exécution → job "check").
 - Vérifiez que les 3 secrets sont bien orthographiés exactement comme
-  attendu (`EMAIL_SENDER`, `EMAIL_PASSWORD`, `EMAIL_RECEIVER`).
+  attendu (`EMAIL_SENDER`, `EMAIL_PASSWORD`, `EMAIL_RECEIVERS`).
 - Vérifiez que le mot de passe utilisé est bien un **mot de passe
   d'application** (16 caractères), pas le mot de passe du compte.
 - Vérifiez vos spams : les premiers e-mails automatisés y atterrissent
@@ -314,8 +314,8 @@ L'architecture modulaire (faible couplage entre `checker`, `parser`,
 l'application :
 
 - **Plusieurs villes** : boucler sur une liste de cibles dans `app.py`.
-- **Plusieurs destinataires** : `EMAIL_RECEIVER` peut devenir une liste
-  séparée par des virgules, à séparer dans `config.py`.
+- **Gestion avancée des destinataires** : définir des groupes distincts
+  selon la ville ou le type de logement.
 - **Notifications Telegram / Discord / SMS** : ajouter un nouveau module
   `notifiers/telegram_sender.py` etc., avec la même interface que
   `EmailSender` (`send_new_housing_alert`), et les appeler depuis

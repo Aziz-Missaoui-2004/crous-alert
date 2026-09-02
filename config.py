@@ -30,6 +30,14 @@ def _get_bool_env(name: str, default: bool) -> bool:
     return raw.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _get_email_receivers() -> tuple[str, ...]:
+    """Lit une liste de destinataires séparés par virgule ou point-virgule."""
+    raw = os.getenv("EMAIL_RECEIVERS") or os.getenv("EMAIL_RECEIVER", "")
+    normalized = raw.replace(";", ",").replace("\n", ",")
+    # dict.fromkeys supprime les doublons tout en conservant l'ordre.
+    return tuple(dict.fromkeys(value.strip() for value in normalized.split(",") if value.strip()))
+
+
 @dataclass(frozen=True)
 class Settings:
     """Regroupe l'intégralité de la configuration de l'application."""
@@ -64,7 +72,12 @@ class Settings:
     smtp_port: int = int(os.getenv("SMTP_PORT", "465"))
     email_sender: str = field(default_factory=lambda: os.getenv("EMAIL_SENDER", ""))
     email_password: str = field(default_factory=lambda: os.getenv("EMAIL_PASSWORD", ""))
-    email_receiver: str = field(default_factory=lambda: os.getenv("EMAIL_RECEIVER", ""))
+    email_receivers: tuple[str, ...] = field(default_factory=_get_email_receivers)
+    """
+    Destinataires des alertes. EMAIL_RECEIVERS accepte plusieurs adresses
+    séparées par des virgules ou des points-virgules. L'ancien nom
+    EMAIL_RECEIVER reste pris en charge pour la compatibilité.
+    """
 
     # --- Divers -------------------------------------------------
     dry_run: bool = _get_bool_env("DRY_RUN", False)
@@ -140,7 +153,7 @@ class Settings:
             for name, value in (
                 ("EMAIL_SENDER", self.email_sender),
                 ("EMAIL_PASSWORD", self.email_password),
-                ("EMAIL_RECEIVER", self.email_receiver),
+                ("EMAIL_RECEIVERS (ou EMAIL_RECEIVER)", self.email_receivers),
             )
             if not value
         ]
