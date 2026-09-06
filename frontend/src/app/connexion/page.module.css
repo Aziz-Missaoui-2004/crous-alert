@@ -56,6 +56,7 @@
 .revealButton:hover { color: #dbeafe; background: rgba(255,255,255,.05); }
 .submitButton { min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 4px; border: 1px solid rgba(240,246,252,.1); border-radius: 6px; color: white; background: #238636; box-shadow: none; font-size: .88rem; font-weight: 650; transition: background .18s ease; }
 .submitButton:hover { background: #2ea043; }
+.submitButton:disabled { cursor: wait; opacity: .65; }
 .demoMessage { margin: -3px 0 0; padding: 10px 12px; border: 1px solid rgba(96,165,250,.25); border-radius: 8px; color: #bfdbfe; background: rgba(37,99,235,.09); font-size: .75rem; line-height: 1.45; }
 .invitationNote { display: grid; grid-template-columns: auto 1fr; gap: 9px; margin-top: 24px; padding-top: 20px; border-top: 1px solid #2a3547; color: #738198; }
 .invitationNote svg { margin-top: 2px; color: #60a5fa; }
