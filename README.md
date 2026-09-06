@@ -61,22 +61,19 @@ sont donc pas fiables comme sélecteur à long terme. Le parseur
 
 ```
 crous-alert/
-├── app.py                  # Point d'entrée : orchestre un cycle complet
-├── checker.py               # Récupération HTML (retry/backoff) + détection des nouveautés
-├── parser.py                 # Extraction des logements depuis le HTML
-├── email_sender.py           # Construction et envoi de l'e-mail HTML/texte
-├── config.py                 # Configuration centralisée (variables d'environnement)
-├── storage.py                 # Modèle Housing + gestion du cache JSON
-├── logger.py                  # Configuration du système de logs
-├── utils.py                   # Retry/backoff, hachage, formatage de dates
-├── exceptions.py               # Exceptions personnalisées
-├── requirements.txt
+├── backend/                    # Bot Python autonome et tâches planifiées
+│   ├── app.py                  # Point d’entrée de la surveillance
+│   ├── checker.py              # Récupération et contrôle des annonces
+│   ├── config.py               # Configuration par variables d’environnement
+│   ├── data/                   # Cache et exclusions persistants
+│   ├── scripts/                # Scripts utilisés par GitHub Actions
+│   └── requirements.txt        # Dépendances Python
+├── frontend/                   # Application web Next.js
 ├── .env.example                # Modèle de variables d'environnement (test local)
 ├── .gitignore
-├── data/
-│   └── cache.json              # Cache des logements déjà signalés
 └── .github/workflows/
-    └── monitor.yml              # Automatisation GitHub Actions
+    ├── monitor.yml              # Surveillance planifiée
+    └── handle_exclusion.yml     # Traitement des exclusions
 ```
 
 **Flux d'exécution** (`app.py`) :
@@ -97,7 +94,7 @@ Prérequis : Python 3.11 ou supérieur.
 
 ```bash
 git clone <url-de-votre-dépôt>
-cd crous-alert
+cd crous-alert/backend
 python3 -m venv venv
 source venv/bin/activate        # Windows : venv\Scripts\activate
 pip install -r requirements.txt
@@ -106,7 +103,7 @@ pip install -r requirements.txt
 Copiez le modèle de configuration puis renseignez vos identifiants :
 
 ```bash
-cp .env.example .env
+cp ../.env.example .env
 ```
 
 Pour charger le fichier `.env` automatiquement, vous pouvez utiliser

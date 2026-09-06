@@ -32,6 +32,9 @@ jobs:
       startsWith(github.event.issue.title, 'exclure-type:')
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: backend
 
     steps:
       - name: Récupération du dépôt
