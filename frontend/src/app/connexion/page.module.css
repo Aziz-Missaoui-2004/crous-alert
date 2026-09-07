@@ -50,8 +50,16 @@
 .field { display: grid; gap: 8px; color: #cbd5e1; font-size: .8rem; font-weight: 650; }
 .inputWrap { min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid #30363d; border-radius: 6px; color: #8b949e; background: #010409; transition: border-color .18s ease, box-shadow .18s ease; }
 .inputWrap:focus-within { border-color: #2f81f7; box-shadow: 0 0 0 3px rgba(47,129,247,.18); }
-.inputWrap input { width: 100%; min-width: 0; border: 0; outline: 0; color: #edf4ff; background: transparent; font-size: .9rem; }
+.inputWrap input { width: 100%; min-width: 0; border: 0; outline: 0; color: #c9d1d9; background: transparent; font-size: .9rem; }
 .inputWrap input::placeholder { color: #64748b; }
+.inputWrap input:-webkit-autofill,
+.inputWrap input:-webkit-autofill:hover,
+.inputWrap input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #c9d1d9;
+  caret-color: #c9d1d9;
+  -webkit-box-shadow: 0 0 0 1000px #010409 inset;
+  box-shadow: 0 0 0 1000px #010409 inset;
+}
 .revealButton { width: 30px; height: 30px; display: grid; flex: 0 0 auto; place-items: center; border: 0; border-radius: 7px; color: #7f8ca1; background: transparent; }
 .revealButton:hover { color: #dbeafe; background: rgba(255,255,255,.05); }
 .submitButton { min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 9px; margin-top: 4px; border: 1px solid rgba(240,246,252,.1); border-radius: 6px; color: white; background: #238636; box-shadow: none; font-size: .88rem; font-weight: 650; transition: background .18s ease; }
