@@ -32,7 +32,7 @@ fonctionnalité doit être discutée, validée, qualifiée juridiquement puis aj
 Cette liste est notre point de reprise principal. Nous avançons dans cet ordre et
 une tâche n'est cochée qu'après son test et sa validation.
 
-- [ ] Corriger le modèle d'e-mail de confirmation Supabase avec `/auth/confirm`.
+- [x] Corriger le modèle d'e-mail de confirmation Supabase avec `/auth/confirm`.
 - [ ] Tester l'inscription et la confirmation avec une adresse e-mail contrôlée.
 - [ ] Transformer le premier compte validé en administrateur approuvé.
 - [ ] Créer la page administrateur des demandes d'accès.
