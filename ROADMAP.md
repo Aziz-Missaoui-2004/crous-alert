@@ -21,11 +21,26 @@ fonctionnalité doit être discutée, validée, qualifiée juridiquement puis aj
 
 ## Convention de travail
 
-- `aziz.work` : développement actif.
-- `aziz` : validation et recette.
-- `main` : version stable, après validation finale.
+- `work` : développement actif et tests locaux.
+- `main` : version stable, après validation.
+- Flux Git : `work` → validation → fusion dans `main`.
 - Une fonctionnalité n'est cochée qu'après implémentation, tests et validation.
 - Chaque décision fonctionnelle doit inclure un contrôle juridique et sécurité.
+
+## Suivi opérationnel — ordre des prochaines étapes
+
+Cette liste est notre point de reprise principal. Nous avançons dans cet ordre et
+une tâche n'est cochée qu'après son test et sa validation.
+
+- [ ] Corriger le modèle d'e-mail de confirmation Supabase avec `/auth/confirm`.
+- [ ] Tester l'inscription et la confirmation avec une adresse e-mail contrôlée.
+- [ ] Transformer le premier compte validé en administrateur approuvé.
+- [ ] Créer la page administrateur des demandes d'accès.
+- [ ] Ajouter les actions Accepter/Refuser et l'e-mail d'acceptation.
+- [ ] Simplifier le tableau de bord aux fonctionnalités indispensables.
+- [ ] Créer les surveillances propres à chaque utilisateur.
+- [ ] Connecter le bot Python aux surveillances enregistrées.
+- [ ] Améliorer les modèles d'e-mail de confirmation et d'alerte.
 
 ## Légende juridique
 
@@ -50,9 +65,9 @@ fonctionnalité doit être discutée, validée, qualifiée juridiquement puis aj
 
 ## Phase 1 — Architecture
 
-- [ ] Valider la technologie du frontend et du backend.
+- [x] Valider la technologie du frontend et du backend.
 - [ ] Valider l'hébergement de l'application.
-- [ ] Valider PostgreSQL et le fournisseur d'authentification.
+- [x] Valider PostgreSQL et le fournisseur d'authentification.
 - [ ] Concevoir le modèle de données.
 - [ ] Concevoir l'isolation des données entre utilisateurs.
 - [ ] Définir l'architecture du worker de surveillance.
@@ -63,11 +78,12 @@ fonctionnalité doit être discutée, validée, qualifiée juridiquement puis aj
 ## Phase 2 — Comptes privés
 
 - [x] Créer l'interface de demande de première connexion.
-- [ ] Connecter la demande à Supabase avec un statut d'approbation.
-- [ ] Créer la connexion et la déconnexion.
+- [x] Connecter la demande à Supabase avec un statut d'approbation.
+- [x] Créer la connexion et protéger le tableau de bord.
+- [ ] Ajouter l'action de déconnexion dans l'interface.
 - [ ] Créer la réinitialisation sécurisée du mot de passe.
 - [ ] Créer la suspension et la réactivation d'un utilisateur.
-- [ ] Ajouter les politiques d'accès à la base de données.
+- [x] Ajouter les politiques d'accès à la base de données.
 - [ ] Ajouter les tests d'autorisation et d'isolation des comptes.
 - [ ] Ajouter une politique de confidentialité et une procédure de suppression des données.
 - [ ] Contrôle RGPD et sécurité de la phase 2.
@@ -124,9 +140,9 @@ fonctionnalité doit être discutée, validée, qualifiée juridiquement puis aj
 
 - [ ] Configurer les environnements de développement, validation et production.
 - [ ] Séparer et protéger tous les secrets.
-- [ ] Ajouter les migrations PostgreSQL.
+- [x] Ajouter la première migration PostgreSQL pour les profils et les règles RLS.
 - [ ] Ajouter les tests automatiques et la CI.
-- [ ] Déployer une version de validation depuis `aziz`.
+- [ ] Déployer une version de validation depuis `work`.
 - [ ] Effectuer une recette complète.
 - [ ] Documenter la restauration et la sauvegarde des données.
 - [ ] Effectuer la revue finale sécurité, RGPD et juridique.
