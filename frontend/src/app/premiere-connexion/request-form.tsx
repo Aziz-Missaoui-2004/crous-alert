@@ -32,7 +32,7 @@ export function AccessRequestForm() {
     setIsSubmitting(true);
 
     const supabase = createClient();
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -53,6 +53,13 @@ export function AccessRequestForm() {
     }
 
     formElement.reset();
+    if (signUpData.user?.identities?.length === 0) {
+      setSuccess(
+        "Une demande existe déjà pour cette adresse ou un e-mail vient d’être envoyé. Vérifiez votre messagerie avant de réessayer.",
+      );
+      return;
+    }
+
     setSuccess(
       "Demande enregistrée. Vérifiez votre adresse e-mail, puis attendez la validation de l’administrateur.",
     );
