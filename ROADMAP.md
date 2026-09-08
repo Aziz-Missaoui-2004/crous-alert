@@ -132,7 +132,7 @@ une tâche n'est cochée qu'après son test et sa validation.
 - [ ] Créer l'assistant de création d'une surveillance.
 - [ ] Créer les écrans de consultation et modification.
 - [ ] Créer l'administration des utilisateurs.
-- [ ] Ajouter les états de chargement, erreurs et confirmations.
+- [x] Ajouter les états de chargement, erreurs et confirmations, avec une page dédiée après validation de l'e-mail.
 - [ ] Vérifier l'accessibilité et l'affichage mobile.
 - [ ] Contrôle juridique des textes, marques et éléments visuels.
 

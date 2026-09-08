@@ -23,19 +23,26 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (request.nextUrl.pathname === "/") {
+  const isDashboard = request.nextUrl.pathname === "/";
+  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
+
+  if (isDashboard || isAdminRoute) {
     if (!user) {
       return NextResponse.redirect(new URL("/connexion", request.url));
     }
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("status")
+      .select("status, role")
       .eq("id", user.id)
       .single();
 
     if (profile?.status !== "approved") {
       return NextResponse.redirect(new URL("/connexion?etat=pending", request.url));
+    }
+
+    if (isAdminRoute && profile.role !== "admin") {
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 

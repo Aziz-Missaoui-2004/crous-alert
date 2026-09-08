@@ -7,7 +7,8 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  // Seules les pages privées ont besoin de vérifier la session.
+  // Les pages d'authentification restent ainsi accessibles même si Supabase
+  // répond lentement ou est momentanément indisponible.
+  matcher: ["/", "/admin/:path*"],
 };

@@ -17,13 +17,21 @@ import {
   Users,
 } from "lucide-react";
 
+import { createClient } from "@/lib/supabase/server";
+
 const watches = [
   { name: "Grenoble centre", zone: "Grenoble · 38000", homes: "Toutes", filters: "Individuel · ≤ 450 €", status: "Active", checked: "Il y a 3 min" },
   { name: "Campus universitaire", zone: "Saint-Martin-d’Hères · 38400", homes: "3 résidences", filters: "Individuel, Couple · ≥ 18 m²", status: "Active", checked: "Il y a 3 min" },
   { name: "Résidences de Gières", zone: "Gières · 38610", homes: "2 résidences", filters: "Tous les types · ≤ 520 €", status: "En pause", checked: "Hier à 21:10" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { data: profile } = user
+    ? await supabase.from("profiles").select("role").eq("id", user.id).single()
+    : { data: null };
+
   return (
     <main className="app-frame">
       <aside className="sidebar">
@@ -40,7 +48,7 @@ export default function HomePage() {
           <a className="nav-item" href="#alerts"><Bell size={18} /> Alertes <span className="nav-dot" /></a>
 
           <span className="nav-label section-gap">GESTION</span>
-          <a className="nav-item" href="#users"><Users size={18} /> Utilisateurs</a>
+          {profile?.role === "admin" && <a className="nav-item" href="/admin/demandes"><Users size={18} /> Administration</a>}
           <a className="nav-item" href="#settings"><Settings size={18} /> Paramètres</a>
         </nav>
 

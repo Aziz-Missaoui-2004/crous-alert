@@ -83,6 +83,22 @@
 .backLink:hover { color: white; }
 .privacyNote { margin: -4px 0 0; color: #748299; font-size: .7rem; line-height: 1.5; }
 .errorMessage { margin: -3px 0 0; padding: 10px 12px; border: 1px solid rgba(248,113,113,.35); border-radius: 8px; color: #fca5a5; background: rgba(127,29,29,.16); font-size: .75rem; line-height: 1.45; }
+.confirmationCard { text-align: center; }
+.confirmationIcon { width: 62px; height: 62px; display: grid; place-items: center; margin: 0 auto 20px; border: 1px solid rgba(63,185,80,.4); border-radius: 50%; color: #3fb950; background: rgba(46,160,67,.12); }
+.confirmationCopy h1 { margin: 0 0 10px; color: #f0f6fc; font-size: 1.6rem; letter-spacing: -.035em; }
+.confirmationCopy p { margin: 0; color: #8b949e; font-size: .86rem; line-height: 1.65; }
+.pendingNotice { display: grid; grid-template-columns: auto 1fr; gap: 11px; margin: 24px 0; padding: 14px; border: 1px solid #30363d; border-radius: 6px; color: #d29922; background: #161b22; text-align: left; }
+.pendingNotice svg { margin-top: 2px; }
+.pendingNotice div { display: grid; gap: 4px; }
+.pendingNotice strong { color: #e6edf3; font-size: .82rem; }
+.pendingNotice span { color: #8b949e; font-size: .75rem; line-height: 1.45; }
+.returnButton { min-height: 44px; display: flex; align-items: center; justify-content: center; border: 1px solid #30363d; border-radius: 6px; color: #c9d1d9; background: #21262d; font-size: .82rem; font-weight: 650; }
+.returnButton:hover { border-color: #8b949e; background: #30363d; }
+.verificationCard { display: grid; justify-items: center; gap: 10px; text-align: center; }
+.verificationCard h1 { margin: 6px 0 0; color: #f0f6fc; font-size: 1.4rem; }
+.verificationCard p { margin: 0; color: #8b949e; font-size: .85rem; }
+.verificationSpinner { color: #58a6ff; animation: verification-spin .8s linear infinite; }
+@keyframes verification-spin { to { transform: rotate(360deg); } }
 .page button:focus-visible { outline: 3px solid rgba(96,165,250,.3); outline-offset: 2px; }
 .page input:focus-visible { outline: none; }
 

@@ -24,41 +24,42 @@ export function LoginForm({ notice }: { notice?: Notice }) {
     setError("");
     setIsSubmitting(true);
 
-    const supabase = createClient();
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const supabase = createClient();
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (signInError || !data.user) {
+      if (signInError || !data.user) {
+        setError(
+          signInError?.message.toLowerCase().includes("email not confirmed")
+            ? "Confirmez d’abord votre adresse e-mail."
+            : "Adresse e-mail ou mot de passe incorrect.",
+        );
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("status, role")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profileError || profile?.status !== "approved") {
+        await supabase.auth.signOut();
+        setError(
+          profile?.status === "rejected"
+            ? "Cette demande d’accès a été refusée. Contactez l’administrateur."
+            : "Votre demande est encore en attente de validation.",
+        );
+        return;
+      }
+
+      router.replace(profile.role === "admin" ? "/admin/demandes" : "/");
+      router.refresh();
+    } catch {
+      setError("La connexion a échoué à cause d’un problème réseau.");
+    } finally {
       setIsSubmitting(false);
-      setError(
-        signInError?.message.toLowerCase().includes("email not confirmed")
-          ? "Confirmez d’abord votre adresse e-mail."
-          : "Adresse e-mail ou mot de passe incorrect.",
-      );
-      return;
     }
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("status")
-      .eq("id", data.user.id)
-      .single();
-
-    if (profileError || profile?.status !== "approved") {
-      await supabase.auth.signOut();
-      setIsSubmitting(false);
-      setError(
-        profile?.status === "rejected"
-          ? "Cette demande d’accès a été refusée. Contactez l’administrateur."
-          : "Votre demande est encore en attente de validation.",
-      );
-      return;
-    }
-
-    router.replace("/");
-    router.refresh();
   }
 
   return (
@@ -74,21 +75,8 @@ export function LoginForm({ notice }: { notice?: Notice }) {
       <label className={styles.field}>
         <span>Mot de passe</span>
         <span className={styles.inputWrap}>
-          <input
-            name="password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Votre mot de passe"
-            autoComplete="current-password"
-            minLength={8}
-            required
-          />
-          <button
-            className={styles.revealButton}
-            type="button"
-            onClick={() => setShowPassword((visible) => !visible)}
-            aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-            aria-pressed={showPassword}
-          >
+          <input name="password" type={showPassword ? "text" : "password"} placeholder="Votre mot de passe" autoComplete="current-password" minLength={8} required />
+          <button className={styles.revealButton} type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"} aria-pressed={showPassword}>
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </span>
