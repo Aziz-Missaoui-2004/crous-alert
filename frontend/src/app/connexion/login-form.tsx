@@ -43,7 +43,13 @@ export function LoginForm({ notice }: { notice?: Notice }) {
         .eq("id", data.user.id)
         .single();
 
-      if (profileError || profile?.status !== "approved") {
+      if (profileError || !profile) {
+        await supabase.auth.signOut();
+        setError("Le compte existe, mais son profil applicatif est introuvable. Contactez l’administrateur.");
+        return;
+      }
+
+      if (profile.status !== "approved") {
         await supabase.auth.signOut();
         setError(
           profile?.status === "rejected"

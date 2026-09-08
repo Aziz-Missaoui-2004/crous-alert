@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   BellRing,
   Check,
@@ -14,36 +16,93 @@ import {
   X,
 } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/server";
-import { approveRequest, rejectRequest, signOut } from "./actions";
+import { createClient } from "@/lib/supabase/client";
 
-export const metadata: Metadata = {
-  title: "Demandes d’accès — CROUS Alert",
-  description: "Gérez les demandes d’accès à CROUS Alert.",
+type AdminProfile = {
+  first_name: string;
+  last_name: string;
+  role: "user" | "admin";
+  status: "pending" | "approved" | "rejected";
 };
 
-export default async function AccessRequestsPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+type AccessRequest = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string;
+};
 
-  if (!user) redirect("/connexion");
+export default function AccessRequestsPage() {
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
+  const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
+  const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const { data: adminProfile } = await supabase
-    .from("profiles")
-    .select("first_name, last_name, role, status")
-    .eq("id", user.id)
-    .single();
+  const loadPage = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      router.replace("/connexion");
+      return;
+    }
 
-  if (adminProfile?.role !== "admin" || adminProfile.status !== "approved") {
-    redirect("/");
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("first_name, last_name, role, status")
+      .eq("id", user.id)
+      .single<AdminProfile>();
+
+    if (profile?.role !== "admin" || profile.status !== "approved") {
+      router.replace("/");
+      return;
+    }
+
+    setAdminProfile(profile);
+
+    const { data, error: requestsError } = await supabase
+      .from("profiles")
+      .select("id, first_name, last_name, email, created_at")
+      .eq("role", "user")
+      .eq("status", "pending")
+      .order("created_at", { ascending: true });
+
+    setError(requestsError ? "Impossible de charger les demandes pour le moment." : "");
+    setRequests((data as AccessRequest[] | null) ?? []);
+    setLoading(false);
+  }, [router, supabase]);
+
+  useEffect(() => {
+    // Le chargement asynchrone initialise l'état depuis la session Supabase.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadPage();
+  }, [loadPage]);
+
+  async function updateRequest(userId: string, status: "approved" | "rejected") {
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ status, updated_at: new Date().toISOString() })
+      .eq("id", userId)
+      .eq("role", "user")
+      .eq("status", "pending");
+
+    if (updateError) {
+      setError("La demande n’a pas pu être mise à jour.");
+      return;
+    }
+
+    await loadPage();
   }
 
-  const { data: requests, error } = await supabase
-    .from("profiles")
-    .select("id, first_name, last_name, email, created_at")
-    .eq("role", "user")
-    .eq("status", "pending")
-    .order("created_at", { ascending: true });
+  async function signOut() {
+    await supabase.auth.signOut();
+    router.replace("/connexion");
+  }
+
+  if (loading || !adminProfile) {
+    return <main className="admin-loading">Chargement de l’espace administrateur…</main>;
+  }
 
   const initials = `${adminProfile.first_name?.[0] ?? "A"}${adminProfile.last_name?.[0] ?? ""}`.toUpperCase();
   const fullName = `${adminProfile.first_name} ${adminProfile.last_name}`;
@@ -74,7 +133,7 @@ export default async function AccessRequestsPage() {
         <div className="user-card">
           <span className="avatar">{initials}</span>
           <div><strong>{fullName}</strong><span>Administrateur</span></div>
-          <form action={signOut}><button className="icon-action" aria-label="Se déconnecter"><LogOut size={17} /></button></form>
+          <button className="icon-action" type="button" onClick={() => void signOut()} aria-label="Se déconnecter"><LogOut size={17} /></button>
         </div>
       </aside>
 
@@ -118,14 +177,8 @@ export default async function AccessRequestsPage() {
                       {new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(request.created_at))}
                     </time>
                     <div className="request-actions">
-                      <form action={approveRequest}>
-                        <input type="hidden" name="userId" value={request.id} />
-                        <button className="approve-action" type="submit"><Check size={16} /> Accepter</button>
-                      </form>
-                      <form action={rejectRequest}>
-                        <input type="hidden" name="userId" value={request.id} />
-                        <button className="reject-action" type="submit"><X size={16} /> Refuser</button>
-                      </form>
+                      <button className="approve-action" type="button" onClick={() => void updateRequest(request.id, "approved")}><Check size={16} /> Accepter</button>
+                      <button className="reject-action" type="button" onClick={() => void updateRequest(request.id, "rejected")}><X size={16} /> Refuser</button>
                     </div>
                   </article>
                 ))}
