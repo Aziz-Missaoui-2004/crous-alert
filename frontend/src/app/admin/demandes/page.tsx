@@ -7,7 +7,6 @@ import {
   BellRing,
   Check,
   Clock3,
-  Home,
   LogOut,
   Mail,
   ShieldCheck,
@@ -17,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
+import { FullScreenLoader } from "@/components/full-screen-loader";
 
 type AdminProfile = {
   first_name: string;
@@ -100,15 +100,13 @@ export default function AccessRequestsPage() {
     router.replace("/connexion");
   }
 
-  if (loading || !adminProfile) {
-    return <main className="admin-loading">Chargement de l’espace administrateur…</main>;
-  }
-
-  const initials = `${adminProfile.first_name?.[0] ?? "A"}${adminProfile.last_name?.[0] ?? ""}`.toUpperCase();
-  const fullName = `${adminProfile.first_name} ${adminProfile.last_name}`;
+  const displayedAdmin = adminProfile ?? { first_name: "", last_name: "", role: "admin", status: "approved" };
+  const initials = `${displayedAdmin.first_name?.[0] ?? "A"}${displayedAdmin.last_name?.[0] ?? ""}`.toUpperCase();
+  const fullName = adminProfile ? `${displayedAdmin.first_name} ${displayedAdmin.last_name}` : "Chargement…";
 
   return (
     <main className="app-frame admin-frame">
+      {loading && <FullScreenLoader label="Chargement de l’espace administrateur…" />}
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-icon"><BellRing size={19} /></span>
@@ -121,8 +119,7 @@ export default function AccessRequestsPage() {
             <UserRoundCheck size={18} /> Demandes d’accès
             {!!requests?.length && <span className="nav-count">{requests.length}</span>}
           </Link>
-          <span className="nav-label section-gap">APPLICATION</span>
-          <Link className="nav-item" href="/"><Home size={18} /> Mon espace</Link>
+          <Link className="nav-item" href="/admin/utilisateurs"><Users size={18} /> Utilisateurs</Link>
         </nav>
 
         <div className="system-card">
@@ -133,7 +130,7 @@ export default function AccessRequestsPage() {
         <div className="user-card">
           <span className="avatar">{initials}</span>
           <div><strong>{fullName}</strong><span>Administrateur</span></div>
-          <button className="icon-action" type="button" onClick={() => void signOut()} aria-label="Se déconnecter"><LogOut size={17} /></button>
+          <button className="icon-action logout-action" type="button" onClick={() => void signOut()} aria-label="Se déconnecter"><LogOut size={17} /></button>
         </div>
       </aside>
 
