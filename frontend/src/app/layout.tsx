@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { VantaBackground } from "@/components/vanta-background";
 import "./globals.css";
+import { AccountShell } from "@/components/account-shell";
 
 export const metadata: Metadata = {
   title: "CROUS Alert — Tableau de bord",
@@ -12,7 +13,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="fr" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <VantaBackground />
-        <div className="site-content">{children}</div>
+        <div className="site-content"><AccountShell>{children}</AccountShell></div>
       </body>
     </html>
   );

@@ -80,19 +80,44 @@ export default function AccessRequestsPage() {
   }, [loadPage]);
 
   async function updateRequest(userId: string, status: "approved" | "rejected") {
-    const { error: updateError } = await supabase
+    const request = requests.find((item) => item.id === userId);
+    if (!request) {
+      setError("Cette demande n’existe plus.");
+      return;
+    }
+
+    const { data: updatedProfile, error: updateError } = await supabase
       .from("profiles")
       .update({ status, updated_at: new Date().toISOString() })
       .eq("id", userId)
       .eq("role", "user")
-      .eq("status", "pending");
+      .eq("status", "pending")
+      .select("id, status")
+      .single();
 
-    if (updateError) {
+    if (updateError || !updatedProfile) {
       setError("La demande n’a pas pu être mise à jour.");
       return;
     }
 
+    let emailFailed = false;
+    if (status === "approved") {
+      const { error: emailError } = await supabase.auth.signInWithOtp({
+        email: request.email,
+        options: {
+          shouldCreateUser: false,
+        },
+      });
+
+      if (emailError) {
+        emailFailed = true;
+      }
+    }
+
     await loadPage();
+    if (emailFailed) {
+      setError("Le compte est accepté, mais l’e-mail d’acceptation n’a pas pu être envoyé.");
+    }
   }
 
   async function signOut() {
