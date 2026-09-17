@@ -112,7 +112,7 @@ export default function UsersPage() {
                   <span className="request-avatar">{user.first_name[0]}{user.last_name[0]}</span>
                   <div className="request-identity"><strong>{user.first_name} {user.last_name}</strong><span>{user.email}</span></div>
                   <span className={`status-badge ${user.status === "approved" ? "is-active" : "is-paused"}`}>{user.status === "approved" ? "Actif" : user.status === "pending" ? "En attente" : "Refusé"}</span>
-                  <button className="reject-action" type="button" onClick={() => setSelectedUser(user)}><Trash2 size={16} /> Supprimer</button>
+                  <button className="user-delete-action" type="button" onClick={() => setSelectedUser(user)}><Trash2 size={16} /> Supprimer</button>
                 </article>
               ))}
             </div>

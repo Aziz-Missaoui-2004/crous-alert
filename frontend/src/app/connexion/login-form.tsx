@@ -59,7 +59,8 @@ export function LoginForm({ notice }: { notice?: Notice }) {
         return;
       }
 
-      router.replace(profile.role === "admin" ? "/admin/demandes" : "/");
+      localStorage.setItem("crous-last-activity", String(Date.now()));
+      router.replace(profile.role === "admin" ? "/admin/demandes" : "/accueil");
       router.refresh();
     } catch {
       setError("La connexion a échoué à cause d’un problème réseau.");

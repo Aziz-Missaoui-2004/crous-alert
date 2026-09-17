@@ -27,6 +27,17 @@ button, a { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
 a { color: inherit; text-decoration: none; }
 .app-frame { min-height: 100vh; display: flex; }
+.account-shell .app-frame > .sidebar { display: none; }
+.account-shell .workspace { margin-left: 0; width: 100%; }
+.account-header { display:flex; align-items:center; gap:16px; padding:12px 24px; border-bottom:1px solid var(--border); background:rgba(13,17,23,.94); }
+.account-header > span { margin-left:auto; color:var(--muted); }
+.account-header .menu-button { display:grid; background:#161b22; color:#c9d1d9; }
+.account-sidebar { position:fixed; z-index:151; inset:0 auto 0 0; width:min(280px,85vw); padding:24px 18px; background:#0d1117; border-right:1px solid var(--border); transform:translateX(-100%); visibility:hidden; transition:transform .22s ease,visibility .22s; }
+.account-sidebar.is-open { transform:translateX(0); visibility:visible; }
+.account-sidebar .brand button { margin-left:auto; }
+.sidebar-shade { position:fixed; z-index:150; inset:0; width:100%; border:0; background:rgba(3,22,55,.32); }
+.account-sidebar button.nav-item { width:100%; border:0; text-align:left; }
+@media(prefers-reduced-motion:reduce) { .account-sidebar { transition:none; } }
 
 .sidebar { position: fixed; z-index: 20; inset: 0 auto 0 0; width: 250px; display: flex; flex-direction: column; padding: 25px 17px 18px; color: #dbeafe; background: var(--sidebar); border-right: 1px solid rgba(255,255,255,.07); }
 .brand { display: flex; align-items: center; gap: 11px; padding: 0 10px 28px; color: white; font-size: 1.02rem; letter-spacing: -.025em; }
@@ -224,6 +235,8 @@ tbody tr:hover { background: #161b22; }
 .approve-action:hover { background: #2ea043; }
 .reject-action { border: 1px solid #30363d; color: #f85149; background: #161b22; }
 .reject-action:hover { border-color: #f85149; background: rgba(248,81,73,.08); }
+.user-delete-action { min-height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 12px; border: 1px solid rgba(248,81,73,.35); border-radius: 6px; color: #ff7b72; background: rgba(248,81,73,.08); font-size: .76rem; font-weight: 700; white-space: nowrap; }
+.user-delete-action:hover { border-color: #f85149; color: #fff; background: #da3633; }
 .requests-state { min-height: 230px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; padding: 28px; color: #8b949e; text-align: center; }
 .requests-state strong { color: #c9d1d9; font-size: .92rem; }
 .requests-state span { font-size: .78rem; }
