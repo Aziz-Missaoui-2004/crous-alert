@@ -1,157 +1,122 @@
 # Feuille de route — CROUS Alert
 
-Ce document suit la transformation du script actuel en application web privée.
+Application web privée de surveillance des logements CROUS.
 
-## Règle du MVP 0
+## Principes de travail
 
-Le projet commence avec les fonctions indispensables uniquement. Toute nouvelle
-fonctionnalité doit être discutée, validée, qualifiée juridiquement puis ajoutée
-à cette feuille de route avant son développement.
+- Le bot Python historique reste exécutable pendant toute la migration.
+- Toute modification du bot doit avoir un test de non-régression.
+- Une fonctionnalité est ajoutée seulement si elle est utile au parcours réel.
+- Aucun doublon entre les pages, les données ou les actions.
+- Chaque changement est vérifié côté frontend, Supabase et worker.
+- Les textes sont courts, explicites et orientés action.
+- Le frontend reste sobre : peu d’écrans, peu d’indicateurs, aucune décoration sans utilité.
+- Les erreurs techniques doivent être visibles et exploitables par l’administrateur.
 
-### Fonctions retenues pour le MVP 0
+## Périmètre du MVP
 
-- [ ] Connexion et déconnexion.
-- [ ] Demande de première connexion validée manuellement par l'administrateur.
-- [ ] Tableau de bord simple.
-- [ ] Création d'une surveillance pour une ville et, facultativement, certaines résidences.
-- [ ] Liste, modification, pause et suppression des surveillances.
-- [ ] Détection des nouvelles annonces sans doublon.
-- [ ] E-mail contenant la résidence et le lien officiel CROUS.
-- [ ] Sidebar fonctionnelle sur ordinateur et mobile.
+Le MVP doit permettre :
 
-## Convention de travail
+- demander un accès et confirmer son adresse e-mail ;
+- approuver ou refuser un compte depuis l’administration ;
+- se connecter et se déconnecter ;
+- créer une surveillance sur une seule zone ou ville ;
+- sélectionner toutes les résidences ou certaines résidences ;
+- filtrer par type, prix maximal et surface minimale ;
+- consulter, modifier, mettre en pause et supprimer ses surveillances ;
+- détecter une nouvelle annonce sans doublon ;
+- envoyer une alerte avec les informations essentielles et le lien officiel CROUS ;
+- afficher l’état minimal du service à l’administrateur.
 
-- `work` : développement actif et tests locaux.
-- `main` : version stable, après validation.
-- Flux Git : `work` → validation → fusion dans `main`.
-- Une fonctionnalité n'est cochée qu'après implémentation, tests et validation.
-- Chaque décision fonctionnelle doit inclure un contrôle juridique et sécurité.
+Règle de notification initiale : une seule alerte par annonce et par surveillance.
+Les rappels configurables seront ajoutés après validation de cette règle.
 
-## Suivi opérationnel — ordre des prochaines étapes
+## Ordre de réalisation
 
-Cette liste est notre point de reprise principal. Nous avançons dans cet ordre et
-une tâche n'est cochée qu'après son test et sa validation.
+### 1. Stabiliser les comptes
 
-- [x] Corriger le modèle d'e-mail de confirmation Supabase avec `/auth/confirm`.
-- [ ] Tester l'inscription et la confirmation avec une adresse e-mail contrôlée.
-- [ ] Transformer le premier compte validé en administrateur approuvé.
-- [ ] Créer la page administrateur des demandes d'accès.
-- [ ] Ajouter les actions Accepter/Refuser et l'e-mail d'acceptation.
-- [ ] Simplifier le tableau de bord aux fonctionnalités indispensables.
-- [ ] Créer les surveillances propres à chaque utilisateur.
-- [ ] Connecter le bot Python aux surveillances enregistrées.
-- [ ] Améliorer les modèles d'e-mail de confirmation et d'alerte.
+- Tester l’inscription, la confirmation e-mail et la connexion avec Supabase.
+- Vérifier la création automatique du profil.
+- Vérifier l’approbation et le refus d’un compte.
+- Ajouter la réinitialisation du mot de passe.
+- Ajouter la suspension et la réactivation d’un utilisateur.
+- Tester l’isolation RLS entre deux comptes.
 
-## Légende juridique
+### 2. Simplifier l’interface
 
-- **Acceptable** : aucun obstacle juridique évident identifié.
-- **À encadrer** : acceptable avec des précautions documentées.
-- **À autoriser** : accord préalable du CNOUS ou d'un autre titulaire nécessaire.
-- **À éviter** : risque juridique important.
+- Remplacer le dashboard fictif par un tableau de bord minimal réel.
+- Afficher uniquement les surveillances de l’utilisateur connecté.
+- Créer l’écran de création d’une surveillance.
+- Créer les écrans de modification, pause et suppression.
+- Garder une navigation administrateur séparée de l’espace utilisateur.
+- Supprimer les graphiques, compteurs et éléments décoratifs non alimentés par de vraies données.
+- Vérifier l’accessibilité et l’affichage mobile essentiel.
 
-> Cette qualification est une analyse pratique et ne remplace pas l'avis d'un juriste.
+### 3. Concevoir les données
 
-## Phase 0 — Cadrage du produit
+- Créer les tables des zones, résidences, surveillances et critères.
+- Ajouter les relations entre utilisateurs et surveillances.
+- Ajouter les règles RLS pour empêcher tout accès croisé.
+- Définir l’identifiant stable d’une annonce et son empreinte de contenu.
+- Définir la conservation et la suppression des anciennes données.
 
-- [x] Valider le parcours de demande et d'acceptation d'un compte.
-- [x] Définir les rôles `admin` et `utilisateur`.
-- [x] Définir le parcours de création d'une surveillance.
-- [x] Définir les critères simples et avancés.
-- [ ] Valider la fréquence et la stratégie des notifications (proposition rédigée).
-- [x] Définir les conditions de pause, modification et suppression.
-- [x] Décider si le service reste gratuit et privé.
-- [x] Rédiger les limites d'usage et la mention de non-affiliation au CROUS.
-- [ ] Contrôle juridique de la phase 0.
+### 4. Construire le worker séparé
 
-## Phase 1 — Architecture
+- Ne pas remplacer directement le bot historique.
+- Réutiliser le parsing seulement après ajout de tests HTML locaux.
+- Télécharger chaque zone une seule fois par cycle.
+- Appliquer les critères de toutes les surveillances concernées.
+- Détecter les changements de structure du site au lieu de conclure à zéro résultat.
+- Empêcher les cycles concurrents entre GitHub Actions et Cron-job.
+- Enregistrer le dernier cycle, les erreurs et les résultats essentiels.
 
-- [x] Valider la technologie du frontend et du backend.
-- [ ] Valider l'hébergement de l'application.
-- [x] Valider PostgreSQL et le fournisseur d'authentification.
-- [ ] Concevoir le modèle de données.
-- [ ] Concevoir l'isolation des données entre utilisateurs.
-- [ ] Définir l'architecture du worker de surveillance.
-- [ ] Éviter de télécharger plusieurs fois la même zone pour différents utilisateurs.
-- [ ] Concevoir la gestion des erreurs, logs et alertes techniques.
-- [ ] Contrôle sécurité et juridique de la phase 1.
+### 5. Ajouter les notifications
 
-## Phase 2 — Comptes privés
+- Utiliser `crous.alerte.sender@gmail.com` avec un mot de passe d’application.
+- Créer un modèle court en texte et HTML.
+- Inclure résidence, ville, prix, surface, type, date de détection et lien officiel.
+- Ajouter la mention de non-affiliation au CROUS.
+- Enregistrer chaque notification envoyée.
+- Gérer les échecs et les nouvelles tentatives sans doublon.
 
-- [x] Créer l'interface de demande de première connexion.
-- [x] Connecter la demande à Supabase avec un statut d'approbation.
-- [x] Créer la connexion et protéger le tableau de bord.
-- [ ] Ajouter l'action de déconnexion dans l'interface.
-- [ ] Créer la réinitialisation sécurisée du mot de passe.
-- [ ] Créer la suspension et la réactivation d'un utilisateur.
-- [x] Ajouter les politiques d'accès à la base de données.
-- [ ] Ajouter les tests d'autorisation et d'isolation des comptes.
-- [ ] Ajouter une politique de confidentialité et une procédure de suppression des données.
-- [ ] Contrôle RGPD et sécurité de la phase 2.
+### 6. Valider avant extension
 
-## Phase 3 — Surveillances personnalisables
+- Tester un cycle complet avec un compte et une surveillance.
+- Tester deux utilisateurs avec des critères différents.
+- Tester une même zone surveillée par plusieurs utilisateurs.
+- Tester une annonce qui disparaît puis réapparaît.
+- Tester une panne réseau et un changement HTML.
+- Tester les permissions utilisateur et administrateur.
+- Déployer une version de validation avant toute migration définitive.
 
-- [ ] Créer une surveillance par ville entière.
-- [ ] Autoriser plusieurs villes dans une surveillance.
-- [ ] Ajouter le filtrage par code postal.
-- [ ] Ajouter l'inclusion de résidences précises.
-- [ ] Ajouter l'exclusion de résidences.
-- [ ] Ajouter les filtres de type, prix et surface.
-- [ ] Permettre la modification, la pause, la duplication et la suppression.
-- [ ] Valider les règles lorsqu'un filtre est vide ou contradictoire.
-- [ ] Contrôle juridique de la collecte et de la réutilisation des données CROUS.
+## Fonctionnalités reportées
 
-## Phase 4 — Moteur de surveillance
+- rappels configurables ;
+- plusieurs zones dans une même surveillance ;
+- historique détaillé et statistiques ;
+- graphiques ;
+- recherche globale ;
+- thème sombre ou effets visuels ;
+- réservation ou action automatisée sur le site CROUS ;
+- paiement, abonnement et ouverture publique ;
+- application mobile native.
 
-- [ ] Adapter le parseur actuel aux recherches multi-zones.
-- [ ] Détecter un changement de structure du site au lieu de conclure à zéro résultat.
-- [ ] Respecter une fréquence raisonnable et limiter la charge sur le site CROUS.
-- [ ] Centraliser les annonces dans PostgreSQL.
-- [ ] Associer chaque annonce aux surveillances correspondantes.
-- [ ] Empêcher les alertes en double.
-- [ ] Ajouter une politique de rétention et de suppression des anciennes annonces.
-- [ ] Ajouter des tests avec des pages HTML enregistrées localement.
-- [ ] Contrôle juridique et technique de la phase 4.
+## Décisions fixées
 
-## Phase 5 — Notifications
+- Application privée et non commerciale.
+- Utilisateurs validés manuellement.
+- Premier administrateur déjà créé.
+- Une zone par surveillance pour le MVP.
+- Alerte unique par annonce par défaut.
+- Rappels après stabilisation de la déduplication.
+- Worker web séparé du bot historique.
+- Frontend minimaliste et fonctionnel avant toute extension visuelle.
 
-- [ ] Choisir le fournisseur d'e-mails.
-- [ ] Créer les modèles HTML et texte.
-- [ ] Inclure le nom de la résidence et un lien explicite vers le site officiel CROUS.
-- [ ] Mentionner la source, la date de détection et la non-affiliation au CROUS.
-- [ ] Ajouter les préférences de notification.
-- [ ] Ajouter l'historique des envois.
-- [ ] Gérer les échecs, nouvelles tentatives et désinscriptions.
-- [ ] Contrôle juridique des e-mails et des données personnelles.
+## Hébergement
 
-## Phase 6 — Interface web
+À décider après validation locale du MVP :
 
-- [x] Initialiser le frontend Next.js avec React, TypeScript, Tailwind et ESLint.
-- [x] Créer un premier prototype responsive du tableau de bord.
-- [x] Créer l'interface de la page de connexion (connexion Supabase à venir).
-- [ ] Créer le tableau de bord utilisateur.
-- [ ] Créer l'assistant de création d'une surveillance.
-- [ ] Créer les écrans de consultation et modification.
-- [ ] Créer l'administration des utilisateurs.
-- [x] Ajouter les états de chargement, erreurs et confirmations, avec une page dédiée après validation de l'e-mail.
-- [ ] Vérifier l'accessibilité et l'affichage mobile.
-- [ ] Contrôle juridique des textes, marques et éléments visuels.
-
-## Phase 7 — Mise en production
-
-- [ ] Configurer les environnements de développement, validation et production.
-- [ ] Séparer et protéger tous les secrets.
-- [x] Ajouter la première migration PostgreSQL pour les profils et les règles RLS.
-- [ ] Ajouter les tests automatiques et la CI.
-- [ ] Déployer une version de validation depuis `work`.
-- [ ] Effectuer une recette complète.
-- [ ] Documenter la restauration et la sauvegarde des données.
-- [ ] Effectuer la revue finale sécurité, RGPD et juridique.
-- [ ] Fusionner la version validée vers `main`.
-
-## Décisions à prendre en premier
-
-- [ ] Service strictement gratuit ou commercialisation future envisagée ?
-- [ ] Invitation avec choix du mot de passe par l'utilisateur ou mot de passe imposé ?
-- [ ] Une surveillance combine-t-elle plusieurs villes, ou une surveillance par ville ?
-- [ ] Alerte unique, rappels périodiques, ou choix laissé à l'utilisateur ?
-- [ ] Conservation souhaitée de l'historique des annonces et notifications ?
+- frontend ;
+- worker ;
+- déclenchement fréquent ;
+- sauvegardes et restauration.

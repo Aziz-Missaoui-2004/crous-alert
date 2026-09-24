@@ -17,7 +17,7 @@ Le MVP 0 reste volontairement minimal. Il doit seulement permettre de :
 1. se connecter avec une adresse e-mail et un mot de passe ;
 2. permettre d'envoyer une demande de première connexion ;
 3. soumettre chaque demande à l'acceptation manuelle de l'administrateur ;
-4. créer une surveillance simple pour une ville, avec des résidences
+4. créer une surveillance simple pour une seule ville ou zone, avec des résidences
    facultatives ;
 5. afficher les surveillances de l'utilisateur ;
 6. modifier, mettre en pause ou supprimer une surveillance ;
@@ -28,7 +28,7 @@ Le MVP 0 reste volontairement minimal. Il doit seulement permettre de :
 ### Fonctionnalités reportées après le MVP 0
 
 - surveillance de plusieurs villes dans une même configuration ;
-- filtres avancés par prix, surface, code postal ou type de logement ;
+- filtres par code postal ;
 - rappels périodiques ;
 - historique détaillé et statistiques ;
 - graphiques d'activité ;
@@ -65,6 +65,9 @@ L'utilisateur peut :
 - créer, modifier, mettre en pause et supprimer ses surveillances ;
 - consulter ses propres correspondances et notifications.
 
+L'administrateur utilise uniquement les écrans d'administration. Il ne possède
+pas de tableau de bord personnel dans le MVP.
+
 ## 4. Parcours principal
 
 ### Accès
@@ -79,10 +82,10 @@ L'utilisateur peut :
 
 L'assistant de création comporte quatre étapes :
 
-1. **Zone** : une ou plusieurs villes, avec codes postaux facultatifs.
+1. **Zone** : une seule ville ou zone.
 2. **Résidences** : toutes les résidences de la zone ou une sélection précise.
 3. **Critères** : type de logement, prix maximal et surface minimale.
-4. **Alertes** : adresse de notification et stratégie de rappel.
+4. **Alertes** : alerte unique par annonce dans le MVP.
 
 Un résumé est affiché avant activation.
 
@@ -102,14 +105,14 @@ Le tableau de bord affiche pour chaque surveillance :
 Chaque surveillance possède :
 
 - un nom libre ;
-- une ou plusieurs villes ;
-- zéro ou plusieurs codes postaux ;
+- une ville ou une zone ;
+- zéro ou plusieurs codes postaux après le MVP initial ;
 - un mode de résidence : `toutes`, `inclusions` ou `toutes sauf exclusions` ;
 - zéro ou plusieurs résidences incluses ou exclues ;
 - zéro ou plusieurs types de logement ;
 - un prix maximal facultatif ;
 - une surface minimale facultative ;
-- une stratégie de notification ;
+- une stratégie de notification limitée à l'alerte unique dans le MVP ;
 - un état actif ou en pause.
 
 Une liste vide de types signifie « tous les types ». Un prix ou une surface
@@ -117,13 +120,8 @@ non renseigné signifie qu'aucune limite correspondante n'est appliquée.
 
 ## 6. Notifications
 
-Deux stratégies sont envisagées :
-
-- `unique` : une seule alerte par annonce et par surveillance ;
-- `rappel` : nouvelle alerte après un délai défini tant que l'annonce reste
-  disponible.
-
-Le mode `unique` est proposé comme valeur par défaut afin d'éviter le spam.
+Le MVP utilise `unique` : une seule alerte par annonce et par surveillance.
+Les rappels seront étudiés après validation de la déduplication.
 
 Chaque e-mail contient au minimum :
 
@@ -171,10 +169,8 @@ techniques du site et ne pas accéder aux pages nécessitant une authentificatio
 Toute commercialisation ou réutilisation publicitaire est exclue tant qu'une
 autorisation écrite du CNOUS n'a pas été obtenue.
 
-## 10. Décisions encore ouvertes
+## 10. Décisions restantes
 
-- Invitation sécurisée ou mot de passe initial imposé par l'administrateur.
-- Une surveillance multi-villes ou une surveillance distincte par ville.
-- Mode `unique` seulement ou possibilité d'activer des rappels.
 - Durée de conservation de l'historique.
 - Hébergement définitif du frontend, du backend et du worker.
+- Procédure de réinitialisation et de suppression des comptes.
