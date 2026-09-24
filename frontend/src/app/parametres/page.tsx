@@ -5,6 +5,7 @@ export default function Page() {
       <div className="basic-state">
         <h2>Session</h2>
         <p>Pour votre sécurité, la session locale se termine après cinq minutes sans interaction.</p>
+        <span className="admin-chip">Démonstration — les réglages seront reliés au compte plus tard.</span>
       </div>
     </BasicPage>
   );

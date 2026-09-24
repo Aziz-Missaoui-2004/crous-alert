@@ -84,6 +84,7 @@ a { color: inherit; text-decoration: none; }
 .basic-state h2 { margin: 0; color: var(--heading); font-size: 1rem; }
 .basic-state p { max-width: 620px; margin: 0; color: var(--muted); font-size: .85rem; line-height: 1.55; }
 .basic-state .primary-action { width: fit-content; margin-top: 8px; }
+.demo-note { margin-top: 20px; padding: 10px 13px; border: 1px solid rgba(245,158,11,.3); border-radius: 7px; color: #fbbf24; background: rgba(245,158,11,.08); font-size: .76rem; }
 .page-title-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 22px; }
 .breadcrumb { color: var(--blue); font-size: .75rem; font-weight: 650; }
 .page-title-row h1 { margin: 6px 0 4px; color: var(--heading); font-size: clamp(1.75rem, 2.5vw, 2.2rem); line-height: 1.15; letter-spacing: -.04em; }
