@@ -144,7 +144,9 @@ export default function AccessRequestsPage() {
             <UserRoundCheck size={18} /> Demandes d’accès
             {!!requests?.length && <span className="nav-count">{requests.length}</span>}
           </Link>
-          <Link className="nav-item" href="/admin/utilisateurs"><Users size={18} /> Utilisateurs</Link>
+          <Link className="nav-item" href="/admin/utilisateurs">
+            <Users size={18} /> Utilisateurs
+          </Link>
         </nav>
 
         <div className="system-card">
