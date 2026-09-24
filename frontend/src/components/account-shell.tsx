@@ -68,15 +68,16 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
   }, [profile, isPublic, expired, supabase]);
   async function logout() {
     intentionalLogout.current = true;
+    setExpired(false);
     localStorage.removeItem(key);
-    await supabase.auth.signOut({ scope: "local" });
-    router.replace("/connexion");
+    try { await supabase.auth.signOut({ scope: "local" }); }
+    finally { router.replace("/connexion"); }
   }
   const admin = profile?.role === "admin";
   const links = admin ? [["/admin/demandes", `Demandes d’accès (${count})`], ["/admin/utilisateurs", "Utilisateurs"]] : [["/accueil", "Accueil"], ["/surveillances", "Surveillances"], ["/logements", "Logements trouvés"], ["/alertes", "Alertes"]];
   const settings = admin ? "/admin/parametres" : "/parametres";
-  if (expired) return <div className="confirm-overlay"><section className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="expired-title"><h2 id="expired-title">Session expirée</h2><p>Votre session est terminée. Reconnectez-vous pour continuer.</p><div className="confirm-actions"><button autoFocus className="primary-action" onClick={() => { localStorage.removeItem(key); router.replace("/connexion"); }}>Se reconnecter</button></div></section></div>;
   if (isPublic) return children;
+  if (expired) return <div className="confirm-overlay"><section className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="expired-title"><h2 id="expired-title">Session expirée</h2><p>Votre session est terminée. Reconnectez-vous pour continuer.</p><div className="confirm-actions"><button autoFocus className="primary-action" onClick={() => { setExpired(false); localStorage.removeItem(key); router.replace("/connexion"); }}>Se reconnecter</button></div></section></div>;
   if (error) return <section className="confirm-dialog"><h2>Chargement interrompu</h2><p>{error}</p><button className="secondary-action" onClick={() => window.location.reload()}>Réessayer</button></section>;
   if (checked !== path) return <FullScreenLoader />;
   if (isAdminRoute) return children;
