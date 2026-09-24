@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
+import { FullScreenLoader } from "@/components/full-screen-loader";
 
 type AdminProfile = {
   first_name: string;
@@ -79,19 +80,44 @@ export default function AccessRequestsPage() {
   }, [loadPage]);
 
   async function updateRequest(userId: string, status: "approved" | "rejected") {
-    const { error: updateError } = await supabase
+    const request = requests.find((item) => item.id === userId);
+    if (!request) {
+      setError("Cette demande n’existe plus.");
+      return;
+    }
+
+    const { data: updatedProfile, error: updateError } = await supabase
       .from("profiles")
       .update({ status, updated_at: new Date().toISOString() })
       .eq("id", userId)
       .eq("role", "user")
-      .eq("status", "pending");
+      .eq("status", "pending")
+      .select("id, status")
+      .single();
 
-    if (updateError) {
+    if (updateError || !updatedProfile) {
       setError("La demande n’a pas pu être mise à jour.");
       return;
     }
 
+    let emailFailed = false;
+    if (status === "approved") {
+      const { error: emailError } = await supabase.auth.signInWithOtp({
+        email: request.email,
+        options: {
+          shouldCreateUser: false,
+        },
+      });
+
+      if (emailError) {
+        emailFailed = true;
+      }
+    }
+
     await loadPage();
+    if (emailFailed) {
+      setError("Le compte est accepté, mais l’e-mail d’acceptation n’a pas pu être envoyé.");
+    }
   }
 
   async function signOut() {
@@ -99,15 +125,13 @@ export default function AccessRequestsPage() {
     router.replace("/connexion");
   }
 
-  if (loading || !adminProfile) {
-    return <main className="admin-loading">Chargement de l’espace administrateur…</main>;
-  }
-
-  const initials = `${adminProfile.first_name?.[0] ?? "A"}${adminProfile.last_name?.[0] ?? ""}`.toUpperCase();
-  const fullName = `${adminProfile.first_name} ${adminProfile.last_name}`;
+  const displayedAdmin = adminProfile ?? { first_name: "", last_name: "", role: "admin", status: "approved" };
+  const initials = `${displayedAdmin.first_name?.[0] ?? "A"}${displayedAdmin.last_name?.[0] ?? ""}`.toUpperCase();
+  const fullName = adminProfile ? `${displayedAdmin.first_name} ${displayedAdmin.last_name}` : "Chargement…";
 
   return (
     <main className="app-frame admin-frame">
+      {loading && <FullScreenLoader label="Chargement de l’espace administrateur…" />}
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-icon"><BellRing size={19} /></span>
@@ -133,7 +157,7 @@ export default function AccessRequestsPage() {
         <div className="user-card">
           <span className="avatar">{initials}</span>
           <div><strong>{fullName}</strong><span>Administrateur</span></div>
-          <button className="icon-action" type="button" onClick={() => void signOut()} aria-label="Se déconnecter"><LogOut size={17} /></button>
+          <button className="icon-action logout-action" type="button" onClick={() => void signOut()} aria-label="Se déconnecter"><LogOut size={17} /></button>
         </div>
       </aside>
 
