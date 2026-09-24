@@ -137,6 +137,8 @@ tbody tr:last-child td { border-bottom: 0; }
 .status-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .is-active { color: #047857; background: #ecfdf5; }
 .is-paused { color: #4b5563; background: #f3f4f6; }
+.is-pending { color: #c2410c; background: #fff7ed; }
+.is-rejected { color: #b91c1c; background: #fef2f2; }
 .row-action { width: 31px; height: 31px; display: grid; place-items: center; border: 0; border-radius: 7px; color: var(--muted); background: transparent; }
 .row-action:hover { background: #eef2f7; }
 button:focus-visible, a:focus-visible { outline: 3px solid rgba(37,139,253,.35); outline-offset: 2px; }

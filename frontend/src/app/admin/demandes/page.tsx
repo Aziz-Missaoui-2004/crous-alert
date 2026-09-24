@@ -7,7 +7,6 @@ import {
   BellRing,
   Check,
   Clock3,
-  Home,
   LogOut,
   Mail,
   ShieldCheck,
@@ -121,8 +120,9 @@ export default function AccessRequestsPage() {
             <UserRoundCheck size={18} /> Demandes d’accès
             {!!requests?.length && <span className="nav-count">{requests.length}</span>}
           </Link>
-          <span className="nav-label section-gap">APPLICATION</span>
-          <Link className="nav-item" href="/"><Home size={18} /> Mon espace</Link>
+          <Link className="nav-item" href="/admin/utilisateurs">
+            <Users size={18} /> Utilisateurs
+          </Link>
         </nav>
 
         <div className="system-card">
