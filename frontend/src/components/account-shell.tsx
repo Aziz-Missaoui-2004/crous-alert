@@ -56,21 +56,30 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
   }, [supabase, isPublic]);
   useEffect(() => {
     if (isPublic || !profile || expired) return;
-    function checkExpiry() {
+    let timer: number | undefined;
+    function expire() {
+      setExpired(true);
+      setOpen(false);
+      void supabase.auth.signOut({ scope: "local" });
+    }
+    function scheduleExpiry() {
+      if (timer !== undefined) window.clearTimeout(timer);
       const last = Number(localStorage.getItem(key));
-      if (last && Date.now() - last >= timeout) { setExpired(true); setOpen(false); void supabase.auth.signOut({ scope: "local" }); return true; }
-      return false;
+      const remaining = last ? timeout - (Date.now() - last) : timeout;
+      timer = window.setTimeout(expire, Math.max(0, remaining));
     }
     function activity(event: Event) {
       const target = event.target;
       if (target instanceof Element && target.closest("[data-manual-logout]")) return;
-      if (!checkExpiry()) localStorage.setItem(key, String(Date.now()));
+      localStorage.setItem(key, String(Date.now()));
+      scheduleExpiry();
     }
     const events = ["pointerdown", "keydown", "scroll"];
     events.forEach(event => window.addEventListener(event, activity, { passive: true }));
-    const timer = window.setInterval(checkExpiry, 1000);
-    document.addEventListener("visibilitychange", checkExpiry);
-    return () => { events.forEach(event => window.removeEventListener(event, activity)); clearInterval(timer); document.removeEventListener("visibilitychange", checkExpiry); };
+    const visibility = () => { if (document.visibilityState === "visible") scheduleExpiry(); };
+    scheduleExpiry();
+    document.addEventListener("visibilitychange", visibility);
+    return () => { events.forEach(event => window.removeEventListener(event, activity)); if (timer !== undefined) window.clearTimeout(timer); document.removeEventListener("visibilitychange", visibility); };
   }, [profile, isPublic, expired, supabase]);
   async function logout() {
     intentionalLogout.current = true;
