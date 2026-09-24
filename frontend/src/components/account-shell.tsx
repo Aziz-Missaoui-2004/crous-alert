@@ -28,13 +28,14 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
         if (cancelled) return;
         if (!user) { if (!isPublic) router.replace("/connexion"); return; }
         intentionalLogout.current = false;
+        setExpired(false);
         const { data, error } = await supabase.from("profiles").select("role,status,first_name,last_name").eq("id", user.id).single<Profile>();
         if (cancelled) return;
         if (error) { setError("Impossible de charger votre profil. Rechargez la page."); return; }
         if (!data || data.status !== "approved") { if (!isPublic) router.replace("/connexion?etat=pending"); return; }
         const last = Number(localStorage.getItem(key));
-        if (last && Date.now() - last >= timeout) { setExpired(true); void supabase.auth.signOut({ scope: "local" }); return; }
-        if (!last) localStorage.setItem(key, String(Date.now()));
+        if (path !== "/connexion" && last && Date.now() - last >= timeout) { setExpired(true); void supabase.auth.signOut({ scope: "local" }); return; }
+        if (path === "/connexion" || !last) localStorage.setItem(key, String(Date.now()));
         const home = data.role === "admin" ? "/admin/demandes" : "/accueil";
         if (path === "/" || path === "/connexion" || (data.role === "admin" && !path.startsWith("/admin/")) || (data.role === "user" && path.startsWith("/admin/"))) { router.replace(home); return; }
         setProfile(data); setChecked(path); setError("");
@@ -48,6 +49,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
   }, [path, isPublic, router, supabase]);
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") { setExpired(false); localStorage.setItem(key, String(Date.now())); }
       if (event === "SIGNED_OUT" && !isPublic && !intentionalLogout.current) setExpired(true);
     });
     return () => subscription.unsubscribe();
