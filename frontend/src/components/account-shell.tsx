@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Menu, X, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { FullScreenLoader } from "./full-screen-loader";
@@ -16,6 +16,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [open, setOpen] = useState(false), [expired, setExpired] = useState(false);
   const [error, setError] = useState(""), [count, setCount] = useState(0);
+  const intentionalLogout = useRef(false);
   const isPublic = publicRoutes.includes(path);
   const isAdminRoute = path.startsWith("/admin");
   useEffect(() => {
@@ -26,6 +27,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
         const { data: { user } } = await supabase.auth.getUser();
         if (cancelled) return;
         if (!user) { if (!isPublic) router.replace("/connexion"); return; }
+        intentionalLogout.current = false;
         const { data, error } = await supabase.from("profiles").select("role,status,first_name,last_name").eq("id", user.id).single<Profile>();
         if (cancelled) return;
         if (error) { setError("Impossible de charger votre profil. Rechargez la page."); return; }
@@ -46,7 +48,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
   }, [path, isPublic, router, supabase]);
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT" && !isPublic) setExpired(true);
+      if (event === "SIGNED_OUT" && !isPublic && !intentionalLogout.current) setExpired(true);
     });
     return () => subscription.unsubscribe();
   }, [supabase, isPublic]);
@@ -64,7 +66,12 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
     document.addEventListener("visibilitychange", checkExpiry);
     return () => { events.forEach(event => window.removeEventListener(event, activity)); clearInterval(timer); document.removeEventListener("visibilitychange", checkExpiry); };
   }, [profile, isPublic, expired, supabase]);
-  async function logout() { localStorage.removeItem(key); await supabase.auth.signOut({ scope: "local" }); router.replace("/connexion"); }
+  async function logout() {
+    intentionalLogout.current = true;
+    localStorage.removeItem(key);
+    await supabase.auth.signOut({ scope: "local" });
+    router.replace("/connexion");
+  }
   const admin = profile?.role === "admin";
   const links = admin ? [["/admin/demandes", `Demandes d’accès (${count})`], ["/admin/utilisateurs", "Utilisateurs"]] : [["/accueil", "Accueil"], ["/surveillances", "Surveillances"], ["/logements", "Logements trouvés"], ["/alertes", "Alertes"]];
   const settings = admin ? "/admin/parametres" : "/parametres";
