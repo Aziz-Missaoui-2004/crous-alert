@@ -17,6 +17,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false), [expired, setExpired] = useState(false);
   const [error, setError] = useState(""), [count, setCount] = useState(0);
   const isPublic = publicRoutes.includes(path);
+  const isAdminRoute = path.startsWith("/admin");
   useEffect(() => {
     let cancelled = false;
     async function check() {
@@ -63,14 +64,15 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
     document.addEventListener("visibilitychange", checkExpiry);
     return () => { events.forEach(event => window.removeEventListener(event, activity)); clearInterval(timer); document.removeEventListener("visibilitychange", checkExpiry); };
   }, [profile, isPublic, expired, supabase]);
-  async function logout() { localStorage.removeItem(key); await supabase.auth.signOut({ scope: "local" }); window.location.assign("/connexion"); }
+  async function logout() { localStorage.removeItem(key); await supabase.auth.signOut({ scope: "local" }); router.replace("/connexion"); }
   const admin = profile?.role === "admin";
   const links = admin ? [["/admin/demandes", `Demandes d’accès (${count})`], ["/admin/utilisateurs", "Utilisateurs"]] : [["/accueil", "Accueil"], ["/surveillances", "Surveillances"], ["/logements", "Logements trouvés"], ["/alertes", "Alertes"]];
   const settings = admin ? "/admin/parametres" : "/parametres";
-  if (expired) return <div className="confirm-overlay"><section className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="expired-title"><h2 id="expired-title">Session expirée</h2><p>Votre session est terminée. Reconnectez-vous pour continuer.</p><div className="confirm-actions"><button autoFocus className="primary-action" onClick={() => { localStorage.removeItem(key); window.location.assign("/connexion"); }}>Se reconnecter</button></div></section></div>;
+  if (expired) return <div className="confirm-overlay"><section className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="expired-title"><h2 id="expired-title">Session expirée</h2><p>Votre session est terminée. Reconnectez-vous pour continuer.</p><div className="confirm-actions"><button autoFocus className="primary-action" onClick={() => { localStorage.removeItem(key); router.replace("/connexion"); }}>Se reconnecter</button></div></section></div>;
   if (isPublic) return children;
   if (error) return <section className="confirm-dialog"><h2>Chargement interrompu</h2><p>{error}</p><button className="secondary-action" onClick={() => window.location.reload()}>Réessayer</button></section>;
   if (checked !== path) return <FullScreenLoader />;
+  if (isAdminRoute) return children;
   return <div className="account-shell"><header className="account-header"><button className="menu-button" aria-label="Ouvrir le menu" aria-expanded={open} aria-controls="account-menu" onClick={() => setOpen(true)}><Menu size={20}/></button><strong>CROUS Alert Sender</strong><span>{profile?.first_name} {profile?.last_name}</span></header>
     {open && <button className="sidebar-shade" aria-label="Fermer le menu" onClick={() => setOpen(false)}/>}
     <aside id="account-menu" className={`account-sidebar ${open ? "is-open" : ""}`} inert={!open} onKeyDown={event => { if (event.key === "Escape") setOpen(false); }}><div className="brand">CROUS Alert<button className="icon-action" aria-label="Fermer le menu" onClick={() => setOpen(false)}><X size={18}/></button></div><nav className="nav-stack"><span className="nav-label">{admin ? "ADMINISTRATION" : "ESPACE"}</span>{links.map(([href,label]) => <Link key={href} href={href} className={`nav-item ${path === href ? "active" : ""}`} onClick={() => setOpen(false)}>{label}</Link>)}<span className="nav-label section-gap">GESTION</span><Link href={settings} className={`nav-item ${path === settings ? "active" : ""}`} onClick={() => setOpen(false)}>Paramètres</Link><button className="nav-item logout-action" onClick={() => void logout()}><LogOut size={18}/> Déconnexion</button></nav></aside>{children}</div>;
