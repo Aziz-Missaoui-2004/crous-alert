@@ -61,7 +61,11 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
       if (last && Date.now() - last >= timeout) { setExpired(true); setOpen(false); void supabase.auth.signOut({ scope: "local" }); return true; }
       return false;
     }
-    function activity() { if (!checkExpiry()) localStorage.setItem(key, String(Date.now())); }
+    function activity(event: Event) {
+      const target = event.target;
+      if (target instanceof Element && target.closest("[data-manual-logout]")) return;
+      if (!checkExpiry()) localStorage.setItem(key, String(Date.now()));
+    }
     const events = ["pointerdown", "keydown", "scroll"];
     events.forEach(event => window.addEventListener(event, activity, { passive: true }));
     const timer = window.setInterval(checkExpiry, 1000);
@@ -85,5 +89,5 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
   if (isAdminRoute) return children;
   return <div className="account-shell"><header className="account-header"><button className="menu-button" aria-label="Ouvrir le menu" aria-expanded={open} aria-controls="account-menu" onClick={() => setOpen(true)}><Menu size={20}/></button><strong>CROUS Alert Sender</strong><span>{profile?.first_name} {profile?.last_name}</span></header>
     {open && <button className="sidebar-shade" aria-label="Fermer le menu" onClick={() => setOpen(false)}/>}
-    <aside id="account-menu" className={`account-sidebar ${open ? "is-open" : ""}`} inert={!open} onKeyDown={event => { if (event.key === "Escape") setOpen(false); }}><div className="brand">CROUS Alert<button className="icon-action" aria-label="Fermer le menu" onClick={() => setOpen(false)}><X size={18}/></button></div><nav className="nav-stack"><span className="nav-label">{admin ? "ADMINISTRATION" : "ESPACE"}</span>{links.map(([href,label]) => <Link key={href} href={href} className={`nav-item ${path === href ? "active" : ""}`} onClick={() => setOpen(false)}>{label}</Link>)}<span className="nav-label section-gap">GESTION</span><Link href={settings} className={`nav-item ${path === settings ? "active" : ""}`} onClick={() => setOpen(false)}>Paramètres</Link><button className="nav-item logout-action" onClick={() => void logout()}><LogOut size={18}/> Déconnexion</button></nav></aside>{children}</div>;
+    <aside id="account-menu" className={`account-sidebar ${open ? "is-open" : ""}`} inert={!open} onKeyDown={event => { if (event.key === "Escape") setOpen(false); }}><div className="brand">CROUS Alert<button className="icon-action" aria-label="Fermer le menu" onClick={() => setOpen(false)}><X size={18}/></button></div><nav className="nav-stack"><span className="nav-label">{admin ? "ADMINISTRATION" : "ESPACE"}</span>{links.map(([href,label]) => <Link key={href} href={href} className={`nav-item ${path === href ? "active" : ""}`} onClick={() => setOpen(false)}>{label}</Link>)}<span className="nav-label section-gap">GESTION</span><Link href={settings} className={`nav-item ${path === settings ? "active" : ""}`} onClick={() => setOpen(false)}>Paramètres</Link><button data-manual-logout className="nav-item logout-action" onClick={() => void logout()}><LogOut size={18}/> Déconnexion</button></nav></aside>{children}</div>;
 }
