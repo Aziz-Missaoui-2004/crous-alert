@@ -20,9 +20,10 @@ Le MVP doit permettre :
 - demander un accès et confirmer son adresse e-mail ;
 - approuver ou refuser un compte depuis l’administration ;
 - se connecter et se déconnecter ;
-- créer une surveillance sur une seule zone ou ville ;
-- sélectionner toutes les résidences ou certaines résidences ;
-- filtrer par type, prix maximal et surface minimale ;
+- créer une surveillance sur une ville ;
+- ajouter éventuellement un code postal ;
+- choisir un type : chambre ou studio ;
+- définir un prix minimum et/ou maximum ;
 - consulter, modifier, mettre en pause et supprimer ses surveillances ;
 - détecter une nouvelle annonce sans doublon ;
 - envoyer une alerte avec les informations essentielles et le lien officiel CROUS ;
@@ -42,7 +43,17 @@ Les rappels configurables seront ajoutés après validation de cette règle.
 - Ajouter la suspension et la réactivation d’un utilisateur.
 - Tester l’isolation RLS entre deux comptes.
 
-### 2. Simplifier l’interface
+### 2. Modéliser les surveillances
+
+- [ ] Créer la table `surveillances` avec ville, code postal optionnel, type et prix.
+- [ ] Ajouter les contraintes de validation en base.
+- [ ] Ajouter les relations entre utilisateurs et surveillances.
+- [ ] Ajouter les règles RLS pour empêcher tout accès croisé.
+- [ ] Tester la migration sur Supabase.
+
+Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes ou codes postaux nécessitent plusieurs surveillances.
+
+### 3. Simplifier l’interface
 
 - Remplacer le dashboard fictif par un tableau de bord minimal réel.
 - Afficher uniquement les surveillances de l’utilisateur connecté.
@@ -52,15 +63,12 @@ Les rappels configurables seront ajoutés après validation de cette règle.
 - Supprimer les graphiques, compteurs et éléments décoratifs non alimentés par de vraies données.
 - Vérifier l’accessibilité et l’affichage mobile essentiel.
 
-### 3. Concevoir les données
+### 4. Données des logements
 
-- Créer les tables des zones, résidences, surveillances et critères.
-- Ajouter les relations entre utilisateurs et surveillances.
-- Ajouter les règles RLS pour empêcher tout accès croisé.
 - Définir l’identifiant stable d’une annonce et son empreinte de contenu.
 - Définir la conservation et la suppression des anciennes données.
 
-### 4. Construire le worker séparé
+### 5. Construire le worker séparé
 
 - Ne pas remplacer directement le bot historique.
 - Réutiliser le parsing seulement après ajout de tests HTML locaux.
@@ -70,7 +78,7 @@ Les rappels configurables seront ajoutés après validation de cette règle.
 - Empêcher les cycles concurrents entre GitHub Actions et Cron-job.
 - Enregistrer le dernier cycle, les erreurs et les résultats essentiels.
 
-### 5. Ajouter les notifications
+### 6. Ajouter les notifications
 
 - Utiliser `crous.alerte.sender@gmail.com` avec un mot de passe d’application.
 - Créer un modèle court en texte et HTML.
@@ -79,7 +87,7 @@ Les rappels configurables seront ajoutés après validation de cette règle.
 - Enregistrer chaque notification envoyée.
 - Gérer les échecs et les nouvelles tentatives sans doublon.
 
-### 6. Valider avant extension
+### 7. Valider avant extension
 
 - Tester un cycle complet avec un compte et une surveillance.
 - Tester deux utilisateurs avec des critères différents.
