@@ -45,19 +45,19 @@ Les rappels configurables seront ajoutés après validation de cette règle.
 
 ### 2. Modéliser les surveillances
 
-- [ ] Créer la table `surveillances` avec ville, code postal optionnel, type et prix.
-- [ ] Ajouter les contraintes de validation en base.
-- [ ] Ajouter les relations entre utilisateurs et surveillances.
-- [ ] Ajouter les règles RLS pour empêcher tout accès croisé.
-- [ ] Tester la migration sur Supabase.
+- [x] Créer la table `surveillances` avec ville, code postal optionnel, type et prix.
+- [x] Ajouter les contraintes de validation en base.
+- [x] Ajouter les relations entre utilisateurs et surveillances.
+- [x] Ajouter les règles RLS pour empêcher tout accès croisé.
+- [x] Tester la migration sur Supabase.
 
 Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes ou codes postaux nécessitent plusieurs surveillances.
 
 ### 3. Simplifier l’interface
 
 - Remplacer le dashboard fictif par un tableau de bord minimal réel.
-- Afficher uniquement les surveillances de l’utilisateur connecté.
-- Créer l’écran de création d’une surveillance.
+- [x] Afficher uniquement les surveillances de l’utilisateur connecté.
+- [x] Créer l’écran de création d’une surveillance.
 - Créer les écrans de modification, pause et suppression.
 - Garder une navigation administrateur séparée de l’espace utilisateur.
 - Supprimer les graphiques, compteurs et éléments décoratifs non alimentés par de vraies données.

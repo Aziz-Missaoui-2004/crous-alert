@@ -141,6 +141,20 @@ a { color: inherit; text-decoration: none; }
 .legal-note { margin: 0; padding: 11px 15px; border-top: 1px solid var(--border); color: #8b95a6; font-size: .66rem; line-height: 1.4; text-align: center; }
 
 .watches-window { margin-top: 14px; overflow: hidden; }
+.watch-form-window { max-width: 760px; margin-top: 18px; }
+.watch-form { display: grid; gap: 16px; padding: 19px; }
+.watch-form label, .watch-form legend { color: var(--heading); font-size: .78rem; font-weight: 650; }
+.watch-form label { display: grid; gap: 7px; }
+.watch-form input[type="text"], .watch-form input[type="number"], .watch-form input:not([type]) { min-height: 40px; padding: 0 11px; border: 1px solid var(--border); border-radius: 7px; outline: 0; color: var(--heading); background: #161b22; font-size: .82rem; }
+.watch-form input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47,129,247,.18); }
+.watch-form fieldset { display: flex; gap: 18px; margin: 0; padding: 0; border: 0; }
+.watch-form fieldset legend { margin-bottom: 8px; }
+.watch-form .choice { display: flex; align-items: center; grid-template-columns: auto auto; gap: 7px; font-weight: 500; }
+.watch-form .choice input { accent-color: var(--blue); }
+.price-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+.form-actions .primary-action, .form-actions .secondary-action { min-height: 38px; }
+.form-error { max-width: 760px; margin: 18px 0 0; padding: 10px 13px; border: 1px solid rgba(248,81,73,.35); border-radius: 7px; color: #ffaba5; background: rgba(248,81,73,.1); font-size: .8rem; }
 .table-title { min-height: 75px; }
 .table-scroll { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; white-space: nowrap; }
@@ -177,6 +191,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid rgba(37,139,253,.35);
   .page-content { padding: 25px 17px 40px; }
   .page-title-row { align-items: stretch; flex-direction: column; }
   .primary-action { width: 100%; min-height: 46px; }
+  .price-fields { grid-template-columns: 1fr; }
+  .form-actions { flex-direction: column-reverse; }
+  .form-actions button { width: 100%; }
   .metric-grid { grid-template-columns: 1fr; }
   .metric-window { min-height: 142px; }
   .tabs { overflow-x: auto; }
