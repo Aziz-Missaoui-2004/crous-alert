@@ -65,15 +65,17 @@ Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes o
 
 ### 4. Données des logements
 
-- [ ] Créer la table `logements` normalisée.
-- [ ] Créer la table `alertes` avec déduplication par surveillance et logement.
-- [ ] Tester les politiques RLS des logements et des alertes.
+- [x] Créer la table `logements` normalisée.
+- [x] Créer la table `alertes` avec déduplication par surveillance et logement.
+- [x] Installer les politiques RLS des logements et des alertes.
 - [ ] Définir l’identifiant stable d’une annonce et son empreinte de contenu.
 - [ ] Définir la conservation et la suppression des anciennes données.
 
 ### 5. Construire le worker séparé
 
 - Ne pas remplacer directement le bot historique.
+- [x] Isoler le filtrage ville, code postal, type et prix dans `backend/worker`.
+- [x] Ajouter les tests unitaires du filtrage.
 - Réutiliser le parsing seulement après ajout de tests HTML locaux.
 - Télécharger chaque zone une seule fois par cycle.
 - Appliquer les critères de toutes les surveillances concernées.
