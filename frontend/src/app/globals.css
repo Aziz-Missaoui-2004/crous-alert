@@ -142,6 +142,9 @@ a { color: inherit; text-decoration: none; }
 
 .watches-window { margin-top: 14px; overflow: hidden; }
 .watch-form-window { max-width: 760px; margin-top: 18px; }
+.watch-actions { display: flex; align-items: center; justify-content: flex-end; gap: 3px; }
+.danger-action { color: #ff7b72; }
+.danger-action:hover { color: #fff; background: #da3633; }
 .watch-form { display: grid; gap: 16px; padding: 19px; }
 .watch-form label, .watch-form legend { color: var(--heading); font-size: .78rem; font-weight: 650; }
 .watch-form label { display: grid; gap: 7px; }
