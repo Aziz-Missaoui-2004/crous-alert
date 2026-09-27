@@ -65,8 +65,11 @@ Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes o
 
 ### 4. Données des logements
 
-- Définir l’identifiant stable d’une annonce et son empreinte de contenu.
-- Définir la conservation et la suppression des anciennes données.
+- [ ] Créer la table `logements` normalisée.
+- [ ] Créer la table `alertes` avec déduplication par surveillance et logement.
+- [ ] Tester les politiques RLS des logements et des alertes.
+- [ ] Définir l’identifiant stable d’une annonce et son empreinte de contenu.
+- [ ] Définir la conservation et la suppression des anciennes données.
 
 ### 5. Construire le worker séparé
 
