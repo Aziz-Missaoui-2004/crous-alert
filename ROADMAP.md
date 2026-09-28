@@ -81,6 +81,8 @@ Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes o
 - [x] Ajouter les tests du lecteur Supabase.
 - [x] Ajouter l’adaptateur CROUS et ses tests HTML/API.
 - [x] Gérer la pagination des résultats CROUS.
+- [x] Orchestrer lecture, filtrage, enregistrement et déduplication.
+- [x] Ajouter un point d’entrée manuel sans envoi d’e-mail.
 - Réutiliser le parsing seulement après ajout de tests HTML locaux.
 - Télécharger chaque zone une seule fois par cycle.
 - Appliquer les critères de toutes les surveillances concernées.

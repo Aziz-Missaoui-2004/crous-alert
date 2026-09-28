@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 import requests
 
 from worker.matching import WatchCriteria
+from worker.source import CrousListing
 
 
 class RepositoryError(RuntimeError):
@@ -70,3 +72,64 @@ class SupabaseRepository:
             )
             for row in rows
         ]
+
+    def upsert_listing(self, item: CrousListing) -> str:
+        now = datetime.now(timezone.utc).isoformat()
+        payload = {
+            "source": "crous",
+            "source_key": item.listing.source_key,
+            "city": item.listing.city,
+            "postal_code": item.listing.postal_code,
+            "residence": item.residence,
+            "housing_type": item.listing.housing_type,
+            "price_min_cents": item.listing.price_min_cents,
+            "price_max_cents": item.listing.price_max_cents,
+            "surface_m2": item.surface_m2,
+            "address": item.address,
+            "url": item.url,
+            "available": True,
+            "last_seen_at": now,
+            "updated_at": now,
+            "raw_data": item.raw_data,
+        }
+        response = self.session.post(
+            f"{self.url}/rest/v1/logements",
+            params={"on_conflict": "source,source_key"},
+            headers={**self.headers, "Prefer": "resolution=merge-duplicates,return=representation"},
+            json=payload,
+            timeout=15,
+        )
+        try:
+            response.raise_for_status()
+            rows = response.json()
+            return str(rows[0]["id"])
+        except (requests.RequestException, ValueError, IndexError, KeyError, TypeError) as exc:
+            raise RepositoryError(f"Impossible d'enregistrer le logement : {exc}") from exc
+
+    def create_alert(self, watch_id: str, listing_id: str) -> bool:
+        response = self.session.post(
+            f"{self.url}/rest/v1/alertes",
+            params={"on_conflict": "surveillance_id,logement_id"},
+            headers={**self.headers, "Prefer": "resolution=ignore-duplicates,return=representation"},
+            json={"surveillance_id": watch_id, "logement_id": listing_id},
+            timeout=15,
+        )
+        try:
+            response.raise_for_status()
+            rows = response.json()
+        except (requests.RequestException, ValueError) as exc:
+            raise RepositoryError(f"Impossible de créer l'alerte : {exc}") from exc
+        return bool(rows)
+
+    def mark_watch_run(self, watch_id: str, error: str | None = None) -> None:
+        response = self.session.patch(
+            f"{self.url}/rest/v1/surveillances",
+            params={"id": f"eq.{watch_id}"},
+            headers=self.headers,
+            json={"last_checked_at": datetime.now(timezone.utc).isoformat(), "last_error": error},
+            timeout=15,
+        )
+        try:
+            response.raise_for_status()
+        except requests.RequestException as exc:
+            raise RepositoryError(f"Impossible de mettre à jour la surveillance : {exc}") from exc
