@@ -68,7 +68,7 @@ Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes o
 - [x] Créer la table `logements` normalisée.
 - [x] Créer la table `alertes` avec déduplication par surveillance et logement.
 - [x] Installer les politiques RLS des logements et des alertes.
-- [ ] Gérer les fourchettes de prix renvoyées par le CROUS.
+- [x] Gérer les fourchettes de prix renvoyées par le CROUS.
 - [ ] Définir l’identifiant stable d’une annonce et son empreinte de contenu.
 - [ ] Définir la conservation et la suppression des anciennes données.
 
@@ -79,6 +79,8 @@ Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes o
 - [x] Ajouter les tests unitaires du filtrage.
 - [x] Lire les surveillances actives via Supabase avec une clé serveur.
 - [x] Ajouter les tests du lecteur Supabase.
+- [x] Ajouter l’adaptateur CROUS et ses tests HTML/API.
+- [x] Gérer la pagination des résultats CROUS.
 - Réutiliser le parsing seulement après ajout de tests HTML locaux.
 - Télécharger chaque zone une seule fois par cycle.
 - Appliquer les critères de toutes les surveillances concernées.
