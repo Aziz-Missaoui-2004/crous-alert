@@ -59,6 +59,8 @@ Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes o
 - [x] Afficher uniquement les surveillances de l’utilisateur connecté.
 - [x] Créer l’écran de création d’une surveillance.
 - [x] Créer les écrans de modification, pause et suppression.
+- [x] Afficher les logements réels depuis Supabase.
+- [x] Afficher les alertes réelles depuis Supabase.
 - Garder une navigation administrateur séparée de l’espace utilisateur.
 - Supprimer les graphiques, compteurs et éléments décoratifs non alimentés par de vraies données.
 - Vérifier l’accessibilité et l’affichage mobile essentiel.
