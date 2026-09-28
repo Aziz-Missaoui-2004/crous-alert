@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { MapPin, Pause, Pencil, Play, Plus, RefreshCw, Trash2 } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
@@ -37,6 +38,7 @@ function formatCriteria(watch: Surveillance) {
 
 export default function WatchesPage() {
   const supabase = useMemo(() => createClient(), []);
+  const searchParams = useSearchParams();
   const [watches, setWatches] = useState<Surveillance[]>([]);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -58,6 +60,17 @@ export default function WatchesPage() {
     const timer = window.setTimeout(() => { void loadWatches(); }, 0);
     return () => window.clearTimeout(timer);
   }, [loadWatches]);
+
+  useEffect(() => {
+    if (searchParams.get("nouvelle") !== "1") return;
+    const timer = window.setTimeout(() => {
+      setError("");
+      setEditingId(null);
+      setForm(emptyForm);
+      setShowForm(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [searchParams]);
 
   function openCreate() {
     setError("");

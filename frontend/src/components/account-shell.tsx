@@ -79,7 +79,7 @@ export function AccountShell({ children }: { children: React.ReactNode }) {
     finally { router.replace("/connexion"); }
   }
   const admin = profile?.role === "admin";
-  const links = admin ? [["/admin/demandes", `Demandes d’accès (${count})`], ["/admin/utilisateurs", "Utilisateurs"]] : [["/accueil", "Accueil"], ["/surveillances", "Surveillances"], ["/logements", "Logements trouvés"], ["/alertes", "Alertes"]];
+  const links = admin ? [["/admin/demandes", `Demandes d’accès (${count})`], ["/admin/utilisateurs", "Utilisateurs"]] : [["/accueil", "Accueil"], ["/surveillances", "Surveillances"], ["/logements", "Logements trouvés"]];
   const settings = admin ? "/admin/parametres" : "/parametres";
   if (isPublic) return children;
   if (expired) return <div className="confirm-overlay"><section className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="expired-title"><h2 id="expired-title">Session expirée</h2><p>Votre session est terminée. Reconnectez-vous pour continuer.</p><div className="confirm-actions"><button autoFocus className="primary-action" onClick={() => { setExpired(false); localStorage.removeItem(key); router.replace("/connexion"); }}>Se reconnecter</button></div></section></div>;
