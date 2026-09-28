@@ -76,6 +76,8 @@ Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes o
 - Ne pas remplacer directement le bot historique.
 - [x] Isoler le filtrage ville, code postal, type et prix dans `backend/worker`.
 - [x] Ajouter les tests unitaires du filtrage.
+- [x] Lire les surveillances actives via Supabase avec une clé serveur.
+- [x] Ajouter les tests du lecteur Supabase.
 - Réutiliser le parsing seulement après ajout de tests HTML locaux.
 - Télécharger chaque zone une seule fois par cycle.
 - Appliquer les critères de toutes les surveillances concernées.
