@@ -13,7 +13,8 @@ class MatchingTests(unittest.TestCase):
             "city": "Grenoble",
             "postal_code": "38000",
             "housing_type": "chambre",
-            "price_cents": 35000,
+            "price_min_cents": 35000,
+            "price_max_cents": 35000,
         }
         values.update(changes)
         return NormalizedListing(**values)
@@ -30,12 +31,16 @@ class MatchingTests(unittest.TestCase):
         self.assertFalse(matches(watch, self.listing(postal_code="38100")))
 
     def test_price_bounds_are_inclusive(self) -> None:
-        self.assertTrue(matches(self.watch, self.listing(price_cents=25000)))
-        self.assertTrue(matches(self.watch, self.listing(price_cents=45000)))
-        self.assertFalse(matches(self.watch, self.listing(price_cents=45001)))
+        self.assertTrue(matches(self.watch, self.listing(price_min_cents=25000, price_max_cents=25000)))
+        self.assertTrue(matches(self.watch, self.listing(price_min_cents=45000, price_max_cents=45000)))
+        self.assertFalse(matches(self.watch, self.listing(price_min_cents=45001, price_max_cents=45001)))
+
+    def test_price_ranges_match_when_they_overlap(self) -> None:
+        self.assertTrue(matches(self.watch, self.listing(price_min_cents=40000, price_max_cents=50000)))
+        self.assertFalse(matches(self.watch, self.listing(price_min_cents=45100, price_max_cents=50000)))
 
     def test_unknown_price_does_not_match_a_price_filter(self) -> None:
-        self.assertFalse(matches(self.watch, self.listing(price_cents=None)))
+        self.assertFalse(matches(self.watch, self.listing(price_min_cents=None, price_max_cents=None)))
 
 
 if __name__ == "__main__":

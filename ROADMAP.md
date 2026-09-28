@@ -68,6 +68,7 @@ Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes o
 - [x] Créer la table `logements` normalisée.
 - [x] Créer la table `alertes` avec déduplication par surveillance et logement.
 - [x] Installer les politiques RLS des logements et des alertes.
+- [ ] Gérer les fourchettes de prix renvoyées par le CROUS.
 - [ ] Définir l’identifiant stable d’une annonce et son empreinte de contenu.
 - [ ] Définir la conservation et la suppression des anciennes données.
 

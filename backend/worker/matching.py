@@ -32,7 +32,8 @@ class NormalizedListing:
     city: str
     postal_code: str | None
     housing_type: str
-    price_cents: int | None
+    price_min_cents: int | None
+    price_max_cents: int | None
 
 
 def matches(criteria: WatchCriteria, listing: NormalizedListing) -> bool:
@@ -46,12 +47,13 @@ def matches(criteria: WatchCriteria, listing: NormalizedListing) -> bool:
     if normalize_text(criteria.housing_type) != normalize_text(listing.housing_type):
         return False
 
-    if listing.price_cents is None:
+    if listing.price_min_cents is None and listing.price_max_cents is None:
         return criteria.min_price_cents is None and criteria.max_price_cents is None
 
-    price = Decimal(listing.price_cents)
-    if criteria.min_price_cents is not None and price < criteria.min_price_cents:
+    listing_min = Decimal(listing.price_min_cents or listing.price_max_cents or 0)
+    listing_max = Decimal(listing.price_max_cents or listing.price_min_cents or 0)
+    if criteria.max_price_cents is not None and criteria.max_price_cents < listing_min:
         return False
-    if criteria.max_price_cents is not None and price > criteria.max_price_cents:
+    if criteria.min_price_cents is not None and criteria.min_price_cents > listing_max:
         return False
     return True
