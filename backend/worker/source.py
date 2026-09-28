@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from dataclasses import dataclass
 from urllib.parse import urljoin
@@ -11,6 +12,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from worker.matching import NormalizedListing, WatchCriteria
+
+logger = logging.getLogger(__name__)
 
 _ACCOMMODATION_RE = re.compile(r"/accommodations/(\d+)")
 _POSTAL_RE = re.compile(r"\b(\d{5})\s+([^,]+)$")
@@ -49,11 +52,14 @@ class CrousSource:
 
     def fetch_for_watch(self, criteria: WatchCriteria) -> list[CrousListing]:
         bounds = self._find_bounds(criteria)
+        logger.info("Recherche CROUS : ville=%s, code_postal=%s, bounds=%s", criteria.city, criteria.postal_code or "tous", bounds)
         next_url: str | None = f"{self.base_url}/tools/{self.tool_id}/search"
         params: dict[str, str] | None = {"bounds": bounds, "locationName": criteria.city}
         cards: list[tuple[str, str, str]] = []
         seen_ids: set[str] = set()
+        pages = 0
         for _ in range(50):
+            pages += 1
             response = self.session.get(
                 next_url,
                 params=params,
@@ -71,6 +77,7 @@ class CrousSource:
             if next_url is None:
                 break
 
+        logger.info("Résultats CROUS : %d carte(s) sur %d page(s) pour %s", len(cards), pages, criteria.city)
         listings: list[CrousListing] = []
         for accommodation_id, residence, address in cards:
             detail = self._fetch_detail(accommodation_id)
@@ -79,6 +86,9 @@ class CrousSource:
             listing = self._normalize_detail(accommodation_id, detail, criteria, residence, address)
             if listing is not None:
                 listings.append(listing)
+            else:
+                logger.info("Logement ignoré : type non reconnu (id=%s, label=%s)", accommodation_id, detail.get("label", "inconnu"))
+        logger.info("Logements normalisés : %d pour %s", len(listings), criteria.city)
         return listings
 
     @staticmethod

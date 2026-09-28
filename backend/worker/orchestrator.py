@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 
 from worker.matching import matches
 from worker.repository import ActiveWatch, SupabaseRepository
 from worker.source import CrousSource
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -27,14 +30,17 @@ def run_cycle(repository: SupabaseRepository, source: CrousSource) -> CycleResul
         try:
             listings = source.fetch_for_watch(watch.criteria)
             result.listings_seen += len(listings)
+            matched_for_watch = 0
             for item in listings:
                 if not matches(watch.criteria, item.listing):
                     continue
                 result.listings_matched += 1
+                matched_for_watch += 1
                 listing_id = repository.upsert_listing(item)
                 if repository.create_alert(watch.id, listing_id):
                     result.alerts_created += 1
             repository.mark_watch_run(watch.id)
+            logger.info("Surveillance %s : %d logement(s) normalisé(s), %d correspondance(s)", watch.id, len(listings), matched_for_watch)
         except Exception as exc:  # noqa: BLE001 - un cycle ne doit pas bloquer les autres surveillances
             message = f"{watch.criteria.city}: {exc}"
             result.errors.append(message)
