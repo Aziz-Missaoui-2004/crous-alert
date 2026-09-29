@@ -41,6 +41,14 @@ class SourceTests(unittest.TestCase):
         listing = source._normalize_detail("1", {"id": 1, "label": "T2", "available": True}, WatchCriteria("Grenoble", None, "studio", None, None), "Residence", "1 rue Test 38000 GRENOBLE")
         self.assertIsNone(listing)
 
+    def test_decodes_crous_html_as_utf8(self) -> None:
+        response = Mock()
+        response.encoding = "iso-8859-1"
+        response.text = "<div>Résidence de Souilhac</div>"
+
+        self.assertEqual(CrousSource._decode_html(response), "<div>Résidence de Souilhac</div>")
+        self.assertEqual(response.encoding, "utf-8")
+
 
 if __name__ == "__main__":
     unittest.main()

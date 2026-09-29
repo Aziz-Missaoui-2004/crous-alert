@@ -177,6 +177,24 @@ Ces secrets sont automatiquement injectés dans le workflow
 (`.github/workflows/monitor.yml`) et ne sont jamais visibles dans les
 logs ni dans le code source.
 
+### Nouveau worker web et notifications personnalisées
+
+Le nouveau worker lit les surveillances Supabase et envoie chaque notification
+à l'adresse e-mail du compte concerné. Il ne réutilise pas `EMAIL_RECEIVERS`.
+Le workflow correspondant est volontairement manuel tant que le bot historique
+reste actif, afin d'éviter les doublons.
+
+Ajoutez aussi ces secrets GitHub :
+
+- `SUPABASE_URL` → URL du projet Supabase ;
+- `SUPABASE_SERVICE_ROLE_KEY` → clé secrète Supabase, jamais la clé anon ;
+- `EMAIL_SENDER` → `crous.alerte.sender@gmail.com` ;
+- `EMAIL_PASSWORD` → mot de passe d'application Gmail.
+
+Lancez ensuite **Actions → Test worker Crous Alert → Run workflow**.
+Le worker exécutera les tests, recherchera les logements correspondant aux
+surveillances actives et regroupera les nouvelles alertes par utilisateur.
+
 ---
 
 ## 7. Automatisation via GitHub Actions

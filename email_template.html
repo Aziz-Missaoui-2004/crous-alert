@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CROUS Alert</title>
+  <style>
+    .cta-button:hover {
+      background-color: #3d86f2 !important;
+    }
+
+    .cta-button {
+      transition: background-color 0.1s ease;
+    }
+  </style>
+</head>
+
+<body style="margin:0;padding:0;background:#f4f5f7;font-family:Arial,Helvetica,sans-serif;color:#111111;">
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5f7;padding:24px 8px 34px;">
+    <tr>
+      <td align="center">
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+               style="max-width:600px;background:#ffffff;border:1px solid #e4e4e4;border-radius:18px;overflow:hidden;box-shadow:0 2px 8px rgba(17,17,17,.06);">
+
+          <!-- En-tête -->
+          <tr>
+            <td style="background:#e1120b;padding:28px 24px;border-radius:14px;color:#ffffff;">
+              <h1 style="font-size:26px;line-height:1.25;font-weight:500;text-align:center;margin:0;color:#ffffff;">
+                Nouveau logement disponible
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Contenu -->
+          <tr>
+            <td style="padding:26px 24px 26px;">
+
+              <p style="font-size:18px;line-height:1.5;margin:0 0 22px;color:#111111;">
+                <strong>{{SUMMARY}}</strong>
+              </p>
+
+              <!-- Les cartes dynamiques sont injectées par le worker. -->
+              {{CARDS}}
+
+              <!-- Pied de mail -->
+              <p style="font-size:12px;line-height:1.6;color:#777777;
+                        border-top:1px solid #eeeeee;padding-top:18px;margin:26px 0 0;">
+                Cette alerte est générée automatiquement par Crous Alert.<br>
+                Crous Alert n’est pas affilié au CROUS.
+              </p>
+
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

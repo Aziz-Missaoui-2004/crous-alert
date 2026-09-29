@@ -22,5 +22,5 @@ export default function Page() {
     void loadProfile();
     return () => { cancelled = true; };
   }, [supabase]);
-  return <BasicPage title="Paramètres" description="Les informations essentielles de votre compte."><div className="basic-state"><h2>Compte</h2>{loading ? <p>Chargement…</p> : error ? <p className="form-error" role="alert">{error}</p> : <><p><strong>{profile?.first_name} {profile?.last_name}</strong><br />{profile?.email}</p><span className="admin-chip">Compte {profile?.status === "approved" ? "approuvé" : profile?.status}</span></>}</div><div className="basic-state"><h2>Session</h2><p>La session se termine automatiquement après cinq minutes sans interaction.</p></div></BasicPage>;
+  return <BasicPage title="Paramètres" description="Les informations essentielles de votre compte."><div className="basic-state"><h2>Compte</h2>{loading ? <p>Chargement…</p> : error ? <p className="form-error" role="alert">{error}</p> : <><p><strong>{profile?.first_name} {profile?.last_name}</strong><br />{profile?.email}</p><span className="admin-chip">Compte {profile?.status === "approved" ? "approuvé" : profile?.status}</span></>}</div><div className="basic-state"><h2>Session</h2><p>La session se termine automatiquement après quinze minutes sans interaction.</p></div></BasicPage>;
 }

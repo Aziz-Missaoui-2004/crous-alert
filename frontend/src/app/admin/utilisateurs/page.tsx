@@ -1,6 +1,6 @@
 "use client";
 
-import { BellRing, LogOut, ShieldCheck, Trash2, UserRoundCheck, Users, X } from "lucide-react";
+import { Activity, BellRing, LogOut, ShieldCheck, Trash2, UserRoundCheck, Users, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -94,6 +94,7 @@ export default function UsersPage() {
           <span className="nav-label">ADMINISTRATION</span>
           <Link className="nav-item" href="/admin/demandes"><UserRoundCheck size={18} /> Demandes d’accès {pendingCount > 0 && <span className="nav-count">{pendingCount}</span>}</Link>
           <Link className="nav-item active" href="/admin/utilisateurs"><Users size={18} /> Utilisateurs</Link>
+          <Link className="nav-item" href="/admin/parametres"><Activity size={18} /> État du worker</Link>
         </nav>
         <div className="system-card"><ShieldCheck size={18} /><div><strong>Espace protégé</strong><span>Réservé aux administrateurs approuvés</span></div></div>
         <div className="user-card"><span className="avatar">{initials}</span><div><strong>{admin ? `${displayedAdmin.first_name} ${displayedAdmin.last_name}` : "Chargement…"}</strong><span>Administrateur</span></div><button className="icon-action logout-action" type="button" onClick={() => void signOut()} aria-label="Se déconnecter"><LogOut size={17} /></button></div>

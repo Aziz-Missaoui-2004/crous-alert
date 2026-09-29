@@ -5,6 +5,7 @@ Application web privée de surveillance des logements CROUS.
 ## Principes de travail
 
 - Le bot Python historique reste exécutable pendant toute la migration.
+- Le bot et le workflow GitHub actuellement en production ne doivent recevoir aucune modification avant la fin et la validation complète du projet.
 - Toute modification du bot doit avoir un test de non-régression.
 - Une fonctionnalité est ajoutée seulement si elle est utile au parcours réel.
 - Aucun doublon entre les pages, les données ou les actions.
@@ -95,9 +96,13 @@ Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes o
 
 ### 6. Ajouter les notifications
 
-- Utiliser `crous.alerte.sender@gmail.com` avec un mot de passe d’application.
-- Créer un modèle court en texte et HTML.
-- Inclure résidence, ville, prix, surface, type, date de détection et lien officiel.
+- [x] Ajouter le suivi en base des notifications en attente, envoyées ou échouées.
+- [x] Créer un expéditeur SMTP dédié au nouveau worker.
+- [x] Créer un modèle court en texte et HTML.
+- [x] Inclure résidence, ville, prix, surface, type, date de détection et lien officiel.
+- [x] Regrouper les nouvelles alertes par utilisateur dans un seul e-mail.
+- [ ] Configurer les secrets Gmail et Supabase dans GitHub Actions.
+- [ ] Tester un envoi réel avec une surveillance active.
 - Ajouter la mention de non-affiliation au CROUS.
 - Enregistrer chaque notification envoyée.
 - Gérer les échecs et les nouvelles tentatives sans doublon.
@@ -133,6 +138,7 @@ Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes o
 - Alerte unique par annonce par défaut.
 - Rappels après stabilisation de la déduplication.
 - Worker web séparé du bot historique.
+- Aucune bascule vers le nouveau worker avant validation complète du MVP et des notifications.
 - Frontend minimaliste et fonctionnel avant toute extension visuelle.
 
 ## Hébergement
@@ -143,3 +149,25 @@ Une surveillance ne contient pas de résidence ni de surface. Plusieurs villes o
 - worker ;
 - déclenchement fréquent ;
 - sauvegardes et restauration.
+
+## Prochaines étapes validées
+
+Ordre à conserver après validation du parcours actuel :
+
+1. Finaliser l’exécution permanente du nouveau worker.
+2. Configurer les secrets du worker dans l’environnement d’exécution choisi.
+3. Ajouter un écran administrateur minimal pour le dernier cycle, son état et ses erreurs.
+4. Détecter les changements de structure du site CROUS au lieu de conclure à zéro résultat.
+5. Définir la conservation et le nettoyage des anciens logements.
+6. Ajouter la mention de non-affiliation au CROUS dans les e-mails.
+7. Tester une panne réseau, une indisponibilité CROUS et un cycle concurrent.
+8. Valider le MVP complet avant tout déploiement définitif.
+
+## Fonctionnalités volontairement reportées
+
+- récupération du mot de passe ;
+- rappels configurables ;
+- statistiques et historique détaillé ;
+- ouverture publique de l’application.
+
+Le bot historique et son workflow GitHub restent inchangés jusqu’à la fin de la validation du nouveau projet.

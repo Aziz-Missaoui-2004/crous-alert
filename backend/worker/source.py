@@ -68,11 +68,12 @@ class CrousSource:
             )
             if not response.ok:
                 raise SourceError(f"Recherche CROUS indisponible ({response.status_code}).")
-            for card in self._search_cards(response.text):
+            page_html = self._decode_html(response)
+            for card in self._search_cards(page_html):
                 if card[0] not in seen_ids:
                     seen_ids.add(card[0])
                     cards.append(card)
-            next_url = self._next_page(response.text)
+            next_url = self._next_page(page_html)
             params = None
             if next_url is None:
                 break
@@ -90,6 +91,12 @@ class CrousSource:
                 logger.info("Logement ignoré : type non reconnu (id=%s, label=%s)", accommodation_id, detail.get("label", "inconnu"))
         logger.info("Logements normalisés : %d pour %s", len(listings), criteria.city)
         return listings
+
+    @staticmethod
+    def _decode_html(response: requests.Response) -> str:
+        """Décode explicitement les pages CROUS en UTF-8 pour préserver les accents."""
+        response.encoding = "utf-8"
+        return response.text
 
     @staticmethod
     def _next_page(html: str) -> str | None:

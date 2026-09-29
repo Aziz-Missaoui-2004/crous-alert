@@ -7,6 +7,7 @@ import {
   BellRing,
   Check,
   Clock3,
+  Activity,
   LogOut,
   Mail,
   ShieldCheck,
@@ -146,6 +147,9 @@ export default function AccessRequestsPage() {
           </Link>
           <Link className="nav-item" href="/admin/utilisateurs">
             <Users size={18} /> Utilisateurs
+          </Link>
+          <Link className="nav-item" href="/admin/parametres">
+            <Activity size={18} /> État du worker
           </Link>
         </nav>
 

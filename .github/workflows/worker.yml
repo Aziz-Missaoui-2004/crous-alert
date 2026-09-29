@@ -1,0 +1,46 @@
+# Test manuel du nouveau worker Supabase + e-mail.
+# Ce workflow reste manuel tant que le bot historique est actif, afin d'éviter
+# deux alertes pour la même annonce.
+
+name: Test worker Crous Alert
+
+on:
+  workflow_dispatch: {}
+
+concurrency:
+  group: crous-worker
+  cancel-in-progress: false
+
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      LANG: C.UTF-8
+      LC_ALL: C.UTF-8
+      PYTHONIOENCODING: utf-8
+    steps:
+      - name: Récupération du dépôt
+        uses: actions/checkout@v4
+
+      - name: Installation de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installation des dépendances
+        run: pip install --no-cache-dir -r requirements.txt
+
+      - name: Vérification des tests
+        run: python3 -m unittest worker.test_matching worker.test_repository worker.test_source worker.test_orchestrator worker.test_notifications
+
+      - name: Exécution du worker
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        run: python3 -m worker.run
