@@ -1,6 +1,6 @@
 # Crous Alert
 
-Private web application for automated monitoring of student accommodation published by CROUS.
+Crous Alert is a production-deployed multi-user monitoring platform that automatically detects new CROUS student-housing listings matching user-defined criteria and sends deduplicated email alerts. It evolved from a Python monitoring bot into a secure serverless web application with authentication, PostgreSQL persistence, Row Level Security, scheduled workers and production monitoring.
 
 Authorized users can create personalized monitoring requests based on city, postal code, housing type and price. When a new matching accommodation is detected, the application stores the alert and sends an email containing the relevant information and the official CROUS listing link.
 
@@ -21,6 +21,21 @@ Authorized users can create personalized monitoring requests based on city, post
 - Responsive interface for desktop and mobile screens.
 
 The application does not book accommodation or submit applications to CROUS. Users are redirected to the official website to continue their own application process.
+
+Production: [crous-alert.vercel.app](https://crous-alert.vercel.app)
+
+## Engineering highlights
+
+- Migrated a legacy Python monitoring bot to a multi-user serverless architecture.
+- Designed per-user data isolation with PostgreSQL Row Level Security.
+- Implemented idempotent alert generation: one `(monitoring_request, listing)` pair produces at most one alert.
+- Added distributed worker locking to prevent concurrent monitoring cycles.
+- Built a resilient ingestion pipeline for unreliable and changing external CROUS data.
+- Integrated Gmail OAuth 2.0, scheduled execution, execution tracking and production error monitoring.
+
+## Engineering challenges
+
+The main engineering challenge was preserving reliable alert behavior while moving from a single-purpose Python process to a multi-user production system. The worker must distinguish a real zero-result search from a CROUS outage, avoid duplicate notifications across repeated cycles, handle concurrent invocations, retry failed notifications without losing alerts and isolate every user’s data. The migration kept the Python implementation as a reference while the TypeScript/Deno Edge Function was validated against the same business rules.
 
 ## Architecture
 
@@ -63,6 +78,14 @@ The application does not book accommodation or submit applications to CROUS. Use
 - PostgreSQL RPC functions for distributed worker locking.
 - Supabase Vault and Edge Function Secrets for sensitive credentials.
 
+## Key engineering decisions
+
+- **Supabase:** provides authentication, PostgreSQL, RLS and server-side execution in one managed platform, keeping the private application simple to operate.
+- **Serverless worker:** Supabase Edge Functions and Cron remove the need to maintain a continuously running server while preserving one-minute scheduling.
+- **PostgreSQL constraints and RPC locks:** database-level guarantees are safer than an in-memory flag when executions can happen on different worker instances.
+- **RLS:** authorization is enforced at the data layer, not only in the UI, so a client cannot access another user’s surveillances or alerts through the API.
+- **OAuth 2.0:** Gmail API replaces password-based email delivery for the production worker.
+
 ### Monitoring worker
 
 The production worker is a TypeScript/Deno Edge Function located in `supabase/functions/crous-worker`.
@@ -84,7 +107,7 @@ T2, T3 and other unrecognized housing types are currently ignored because the fu
 
 ## Duplicate prevention and reliability
 
-Deduplication is based on the monitoring request and the listing. A listing already associated with a request does not generate another alert on every subsequent cycle.
+Alert creation is idempotent. The invariant is: a `(monitoring_request, listing)` pair can produce at most one alert. A listing already associated with a request does not generate another alert on every subsequent cycle, even when the same listing remains visible for many minutes.
 
 The worker also uses:
 
@@ -140,6 +163,17 @@ Prerequisites:
 - Gmail secrets configured in Supabase Edge Functions.
 
 The key used by Cron must be a secret Supabase key stored in Vault and must never be a frontend variable.
+
+## Production behavior
+
+- The production worker runs every minute through Supabase Cron.
+- Each cycle records the number of watches, listings seen, matches and alerts created.
+- Failed cycles retain a structured error for administrator inspection.
+- A successful second cycle with the same listing creates no duplicate alert.
+- The frontend is deployed on Vercel and the backend worker runs on Supabase Edge Functions.
+- The production email path uses Gmail OAuth 2.0 and a responsive HTML template.
+
+Runtime metrics are available through the `worker_runs` table and the administrator monitoring page. No unverified traffic or user-count figures are claimed in this README.
 
 ## Local setup
 
@@ -213,6 +247,8 @@ The production validation process covers:
 - responsive desktop and mobile layouts;
 - Vercel deployment and Supabase Auth redirects.
 
+The automated Python suite currently validates matching, repository behavior, CROUS normalization, orchestration and notification formatting. Production validation additionally covers Auth flows, RLS behavior, real CROUS detection, Cron execution, duplicate prevention and email delivery. Further automated coverage planned for the next iteration includes explicit RLS integration tests, worker-lock contention tests, network-failure fixtures and notification-retry scenarios.
+
 ## Deployment
 
 ### Vercel frontend
@@ -229,7 +265,7 @@ Install Command: npm install
 Production variables:
 
 ```text
-NEXT_PUBLIC_SUPABASE_URL=https://dtqesulcdfgztqaecpat.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...
 ```
 
@@ -252,7 +288,7 @@ From the repository root:
 
 ```bash
 npx supabase functions deploy crous-worker \
-  --project-ref dtqesulcdfgztqaecpat
+  --project-ref your-project-ref
 ```
 
 ## Historical Python bot
@@ -281,7 +317,9 @@ crous-alert/
 └── ROADMAP.md                         # Development roadmap
 ```
 
-## Security and limitations
+## Security model and limitations
+
+Trust boundaries are explicit: the browser is untrusted, Supabase Auth identifies the user, PostgreSQL RLS enforces row-level access, and the Edge Function uses server-side credentials for worker operations. The frontend only receives publishable configuration; Gmail OAuth credentials, Cron keys and database service credentials stay in Supabase Secrets or Vault.
 
 - Private, non-public application.
 - Manually approved accounts.
@@ -292,6 +330,17 @@ crous-alert/
 - No automated booking, payment or application submission.
 - Security testing must remain limited to the controlled project and must not include DoS, DDoS, flooding or access to other projects.
 - Data quality depends on the availability and structure of the CROUS source website.
+
+## What this project demonstrates
+
+- End-to-end ownership of a production web application.
+- Backend and cloud architecture design.
+- Authentication and authorization at both application and database layers.
+- Data ingestion from an unreliable external source.
+- Idempotent processing and concurrent-worker control.
+- Secure secret management and OAuth 2.0 integration.
+- Migration of an existing system without losing a working reference implementation.
+- Operational debugging, deployment and production validation.
 
 ## Future improvements
 
