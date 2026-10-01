@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, BellRing, CheckCircle2, Clock3, LogOut, ShieldCheck, Users, XCircle } from "lucide-react";
+import { Activity, BellRing, CheckCircle2, Clock3, LogOut, RefreshCw, ShieldCheck, Users, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
@@ -20,17 +20,20 @@ export default function AdminMonitoringPage() {
   const [run, setRun] = useState<Run | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadPage = useCallback(async () => {
+    setRefreshing(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return router.replace("/connexion");
+    if (!user) { setRefreshing(false); return router.replace("/connexion"); }
     const { data: profile } = await supabase.from("profiles").select("first_name,last_name,role,status").eq("id", user.id).single<Admin>();
-    if (profile?.role !== "admin" || profile.status !== "approved") return router.replace("/");
+    if (profile?.role !== "admin" || profile.status !== "approved") { setRefreshing(false); return router.replace("/"); }
     const { data, error: runError } = await supabase.from("worker_runs").select("id,status,started_at,finished_at,watches,listings_seen,listings_matched,alerts_created,error").order("started_at", { ascending: false }).limit(1).maybeSingle<Run>();
     setAdmin(profile);
     setRun(data);
     setError(runError ? "Impossible de charger l’état du worker. Vérifiez la migration de lecture administrateur." : "");
     setLoading(false);
+    setRefreshing(false);
   }, [router, supabase]);
 
   useEffect(() => {
@@ -62,7 +65,7 @@ export default function AdminMonitoringPage() {
       <div className="user-card"><span className="avatar">{initials}</span><div><strong>{admin ? `${admin.first_name} ${admin.last_name}` : "Chargement…"}</strong><span>Administrateur</span></div><button className="icon-action logout-action" type="button" onClick={() => void signOut()} aria-label="Se déconnecter"><LogOut size={17} /></button></div>
     </aside>
     <section className="workspace"><div className="page-content admin-content">
-      <section className="page-title-row"><div><span className="breadcrumb">CROUS Alert / Administration</span><h1>État du worker</h1><p>Dernier cycle d’exécution du service de surveillance.</p></div><button className="secondary-action" type="button" onClick={() => void loadPage()}>Actualiser</button></section>
+      <section className="page-title-row"><div><span className="breadcrumb">CROUS Alert / Administration</span><h1>État du worker</h1><p>Dernier cycle d’exécution du service de surveillance.</p></div><button className="secondary-action monitor-refresh" type="button" onClick={() => void loadPage()} disabled={refreshing}><RefreshCw className={refreshing ? "is-spinning" : ""} size={16} />{refreshing ? "Actualisation…" : "Actualiser"}</button></section>
       {error && <p className="requests-state is-error">{error}</p>}
       {!error && !run && <section className="window requests-window"><div className="requests-state"><Activity size={28} /><strong>Aucun cycle enregistré</strong><span>Le nouveau worker n’a pas encore exécuté de cycle.</span></div></section>}
       {run && <>
@@ -71,7 +74,7 @@ export default function AdminMonitoringPage() {
           <article className="metric-window"><div className="window-top"><span className="metric-icon"><Users size={19} /></span></div><span className="metric-label">Surveillances</span><strong className="metric-value">{run.watches}</strong><span className="metric-foot">Traitées au dernier cycle</span></article>
           <article className="metric-window"><div className="window-top"><span className="metric-icon"><CheckCircle2 size={19} /></span></div><span className="metric-label">Alertes créées</span><strong className="metric-value">{run.alerts_created}</strong><span className="metric-foot">Nouvelles correspondances</span></article>
         </section>
-        <section className="window requests-window"><div className="window-header"><div><h2>Dernier cycle</h2><p>{run.finished_at ? `Terminé le ${dateFormat.format(new Date(run.finished_at))}` : "Cycle en cours"}</p></div>{run.status === "completed" ? <CheckCircle2 className="monitor-ok" size={22} /> : <XCircle className="monitor-error" size={22} />}</div><div className="worker-summary"><span>{run.listings_seen} logement(s) lu(s)</span><span>{run.listings_matched} correspondance(s)</span></div>{run.error && <p className="worker-error"><strong>Erreur :</strong> {run.error}</p>}</section>
+        <section className="window requests-window"><div className="window-header"><div><h2>Dernier cycle</h2><p>{run.finished_at ? `Terminé le ${dateFormat.format(new Date(run.finished_at))}` : "Cycle en cours"}</p></div>{run.status === "completed" ? <CheckCircle2 className="monitor-ok" size={22} /> : <XCircle className="monitor-error" size={22} />}</div><div className="worker-summary"><span>{run.listings_seen} logement(s) lu(s)</span><span>{run.listings_matched} correspondance(s)</span></div>{run.error && <div className="worker-error" role="alert"><div className="worker-error-title"><XCircle size={17} /><strong>Erreurs du dernier cycle</strong></div><ul>{run.error.split(/;\s*|\n/).filter(Boolean).map((message, index) => <li key={`${index}-${message}`}>{message}</li>)}</ul></div>}</section>
       </>}
     </div></section>
   </main>;

@@ -11,6 +11,12 @@ __pycache__/
 # Variables d'environnement locales (NE JAMAIS COMMIT)
 .env
 
+# Dépendances et fichiers temporaires générés localement
+node_modules/
+supabase/.temp/
+/package.json
+/package-lock.json
+
 # Fichiers d'IDE
 .vscode/
 .idea/
