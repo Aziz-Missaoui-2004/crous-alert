@@ -45,6 +45,10 @@ Live application: [crous-alert.vercel.app](https://crous-alert.vercel.app)
 
 The production worker runs every minute. Each cycle records the number of active watches, listings seen, matches, alerts created and errors. A `(monitoring request, listing)` pair can produce at most one alert.
 
+## Architecture overview
+
+![Crous Alert architecture](<docs/Architecture moderne d’une application web.png>)
+
 ## Project documentation
 
 Detailed technical documentation is available in [`docs/`](docs/README.md):

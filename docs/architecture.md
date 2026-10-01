@@ -1,5 +1,7 @@
 # Architecture and data flow
 
+![Crous Alert architecture overview](<Architecture moderne d’une application web.png>)
+
 ## System overview
 
 ```text
