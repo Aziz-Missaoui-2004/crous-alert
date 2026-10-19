@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BellRing } from "lucide-react";
+import { BellRing, Mail, Phone } from "lucide-react";
 
 import { LoginForm } from "./login-form";
 import styles from "./page.module.css";
