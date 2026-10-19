@@ -238,3 +238,27 @@
   }
 }
 
+
+/* La page contient la carte et le footer dans le flux normal */
+.centeredPage {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* La zone de connexion occupe l'espace disponible */
+.centeredPage .loginArea {
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
+  padding-bottom: 42px;
+}
+
+/* Espacement adapté aux petits écrans */
+@media (max-width: 600px) {
+  .centeredPage .loginArea {
+    padding-bottom: 28px;
+  }
+}
