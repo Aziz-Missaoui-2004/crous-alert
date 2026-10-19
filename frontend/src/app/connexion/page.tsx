@@ -47,7 +47,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/connexion"
         <footer className={styles.adminFooter} aria-label="Contact de l’administrateur">
           <div className={styles.adminFooterIdentity}>
             <span className={styles.adminFooterLabel}>
-              Contact administrateur
+               Administrateur:
             </span>
             <strong>Aziz Missaoui</strong>
           </div>
