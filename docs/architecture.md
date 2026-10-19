@@ -1,30 +1,8 @@
 # Architecture and data flow
 
-![Crous Alert architecture overview](<Architecture moderne d’une application web.png>)
-
 ## System overview
 
-```text
-                         ┌────────────────────────┐
-                         │   Next.js Frontend     │
-                         │   Vercel               │
-                         └───────────┬────────────┘
-                                     │ Auth + API
-                         ┌───────────▼────────────┐
-                         │   Supabase              │
-                         │ Auth · PostgreSQL · RLS │
-                         └───────────┬────────────┘
-                                     │ Supabase Cron
-                         ┌───────────▼────────────┐
-                         │ Edge Function           │
-                         │ TypeScript / Deno       │
-                         └──────┬──────────┬───────┘
-                                │          │
-                    ┌───────────▼───┐  ┌───▼────────────┐
-                    │ CROUS website  │  │ Gmail API      │
-                    │ and API        │  │ OAuth 2.0      │
-                    └────────────────┘  └────────────────┘
-```
+![Crous Alert architecture overview](<Architecture moderne d’une application web.png>)
 
 ## Frontend
 
