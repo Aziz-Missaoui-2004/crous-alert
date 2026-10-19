@@ -44,6 +44,27 @@ export default async function LoginPage({ searchParams }: PageProps<"/connexion"
           <Link href="/premiere-connexion">Première connexion</Link>
         </div>
       </section>
+        <footer className={styles.adminFooter} aria-label="Contact de l’administrateur">
+          <div className={styles.adminFooterIdentity}>
+            <span className={styles.adminFooterLabel}>
+              Contact administrateur
+            </span>
+            <strong>Aziz Missaoui</strong>
+          </div>
+
+          <div className={styles.adminFooterLinks}>
+            <a href="mailto:aziz.missaoui.2004@gmail.com">
+              <Mail size={15} aria-hidden="true" />
+              <span>aziz.missaoui.2004@gmail.com</span>
+            </a>
+
+            <a href="tel:+33603538142">
+              <Phone size={15} aria-hidden="true" />
+              <span>+33 6 03 53 81 42</span>
+            </a>
+          </div>
+        </footer>
+
     </main>
   );
 }
